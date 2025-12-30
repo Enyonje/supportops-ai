@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: infra-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres   # ⬅️ IMPORTANT: must be postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  temporal:
+    image: temporalio/auto-setup:1.23
+    container_name: infra-temporal
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB: postgresql
+      DB_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: postgres
+      POSTGRES_SEEDS: postgres
+    ports:
+      - "7233:7233"
+
+  backend:
+    build: ../backend
+    container_name: infra-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      temporal:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/supportops
+      TEMPORAL_HOST: temporal:7233
+    ports:
+      - "8000:8000"
+    command: >
+      uvicorn app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+
+  frontend:
+    build: ../frontend
+    container_name: infra-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
+volumes:
+  postgres_data:

@@ -3,6 +3,7 @@ import time
 from temporalio import activity
 from sqlmodel import Session, SQLModel, create_engine
 from sqlalchemy.exc import OperationalError
+from app.database import engine
 
 # Define engine
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://user:password@postgres:5432/supportops")

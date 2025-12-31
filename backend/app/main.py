@@ -64,6 +64,10 @@ async def wait_for_postgres():
 @app.on_event("startup")
 async def startup_event():
     print("🚀 Initializing SupportOps AI Engine...")
+    await create_db_and_tables()
+    app.state.temporal_client = await get_client()
+
+
     
     # 1. Ensure DB is alive
     await wait_for_postgres()

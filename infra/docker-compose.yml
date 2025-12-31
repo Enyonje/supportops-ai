@@ -5,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres   # ⬅️ IMPORTANT: must be postgres
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     healthcheck:
@@ -23,10 +23,10 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DB: postgresql
+      DB: postgres
       DB_PORT: 5432
       POSTGRES_USER: postgres
-      POSTGRES_PWD: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_SEEDS: postgres
     ports:
       - "7233:7233"
@@ -40,7 +40,7 @@ services:
       temporal:
         condition: service_started
     environment:
-      DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/supportops
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/postgres
       TEMPORAL_HOST: temporal:7233
     ports:
       - "8000:8000"

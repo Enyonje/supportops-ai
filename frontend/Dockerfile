@@ -8,6 +8,4 @@ RUN npm install
 COPY . .
 
 EXPOSE 5173
-
-# This runs the Vite dev server inside the container
 CMD ["npm", "run", "dev", "--", "--host"]

@@ -83,6 +83,10 @@ async def startup_event():
     else:
         print("⚠️ Running WITHOUT Temporal (degraded mode)")
 
+@app.get("/")
+async def root():
+    return {"message": "SupportOps AI Engine is running", "docs": "/docs"}
+
 # --- 5. HEALTH MONITORING ---
 @app.get("/health")
 async def health_check():

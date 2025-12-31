@@ -4,7 +4,7 @@ from fastapi import APIRouter, Request, HTTPException, Header
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from sqlalchemy import text
-from app.database import SessionLocal
+from app.database import SessionLocal  # This will now work!
 
 router = APIRouter()
 

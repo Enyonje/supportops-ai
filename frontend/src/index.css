@@ -28,3 +28,22 @@ body {
   min-height: 100vh;
   background-color: var(--color-midnight);
 }
+
+@media print {
+  /* Hide UI elements we don't want in the PDF */
+  aside, footer, button, .no-print {
+    display: none !important;
+  }
+  
+  /* Reset background for printer friendliness if desired, 
+     or keep it dark for the 'Tech' look */
+  body {
+    background: #020617 !important;
+    -webkit-print-color-adjust: exact;
+  }
+
+  main {
+    margin: 0 !important;
+    padding: 20px !important;
+  }
+}

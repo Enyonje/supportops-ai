@@ -77,12 +77,25 @@ export default function Dashboard() {
         </header>
 
         {/* STATS GRID */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-          <StatCard title="Active Workflows" value="12" icon={Workflow} />
-          <StatCard title="Auto-Resolved" value="842" icon={Zap} />
-          <StatCard title="Open Tickets" value="27" icon={Ticket} />
-          <StatCard title="System Health" value="99.9%" icon={BarChart3} />
-        </section>
+      {/* STATS GRID */}
+<section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6"> {/* Changed to grid-cols-5 */}
+  <StatCard title="Active Workflows" value="12" icon={Workflow} />
+  <StatCard title="Auto-Resolved" value="842" icon={Zap} />
+  <StatCard title="Open Tickets" value="27" icon={Ticket} />
+  <StatCard title="System Health" value="99.9%" icon={BarChart3} />
+  
+  {/* NEW: ROI CARD (Only visible in Demo Mode) */}
+  {isDemoMode && (
+    <div className="group rounded-2xl bg-blue-500/10 border border-blue-500/20 p-6 hover:bg-blue-500/20 transition-all cursor-pointer">
+      <div className="flex items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-blue-400 font-bold">Revenue Saved</p>
+        <Sparkles className="w-5 h-5 text-blue-400 animate-pulse" />
+      </div>
+      <h2 className="text-5xl font-extrabold mt-4 text-white">$14.2k</h2>
+      <p className="text-[10px] text-blue-400/60 mt-2 font-medium italic">Based on $16.80 avg/resolution</p>
+    </div>
+  )}
+</section>
 
         {/* LIVE ACTIVITY */}
         <section className="rounded-3xl border border-white/10 bg-white/5 p-8">

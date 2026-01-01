@@ -1,25 +1,35 @@
-const ACTIONS = [
-  "Analyzing sentiment",
-  "Scanning documentation",
-  "Checking system logs",
-  "Drafting response",
-  "Verifying API status",
-  "Routing to specialized agent"
-];
-
-const TICKETS = ["TKT-882", "TKT-441", "TKT-102", "TKT-909", "TKT-552"];
-
+// High-fidelity event generator for SupportOps Demo
 export const generateMockEvent = () => {
-  const ticket = TICKETS[Math.floor(Math.random() * TICKETS.length)];
-  const action = ACTIONS[Math.floor(Math.random() * ACTIONS.length)];
-  
+  const actions = [
+    { text: "Analyzing API Logs", icon: "search" },
+    { text: "Optimizing Workflow #12", icon: "zap" },
+    { text: "Validating Security Protocol", icon: "shield" },
+    { text: "Routing Ticket to Autonomous Agent", icon: "route" },
+    { text: "Calculating ROI Impact", icon: "trending-up" },
+    { text: "Resolving OAuth Timeout", icon: "check-circle" }
+  ];
+
+  const customers = [
+    "Global Logistics Corp", 
+    "Vertex Systems", 
+    "CloudScale AI", 
+    "Nexus Fintech", 
+    "AeroSpace Dynamics"
+  ];
+
+  const randomAction = actions[Math.floor(Math.random() * actions.length)];
+  const randomCustomer = customers[Math.floor(Math.random() * customers.length)];
+  const ticketId = `TKT-${Math.floor(1000 + Math.random() * 9000)}`;
+
   return {
     id: Math.random().toString(36).substr(2, 9),
-    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    ticket: ticket,
-    action: action,
-    status: Math.random() > 0.4 ? "processing" : "completed",
-    priority: Math.random() > 0.7 ? "High" : "Normal",
-    customerMessage: "I'm experiencing an issue with my integration. Can you check the logs?"
+    ticket: ticketId,
+    customer: randomCustomer,
+    action: randomAction.text,
+    status: Math.random() > 0.3 ? "completed" : "processing",
+    timestamp: "Just now",
+    ai_confidence: `${(92 + Math.random() * 7).toFixed(1)}%`,
+    customerMessage: `Incoming request from ${randomCustomer} regarding system latency.`,
+    revenue_impact: "$420.00" // Simulated savings per ticket
   };
 };

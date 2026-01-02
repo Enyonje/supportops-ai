@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 
-from database import get_session
+from app.database import get_session
 from models.ticket import Ticket
 from models.audit_log import AuditLog
 from core.ai import generate_ai_reply

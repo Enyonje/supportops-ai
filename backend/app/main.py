@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import tickets, users, auth
-from database import create_db_and_tables
+from app.database import create_db_and_tables
 from app.api import revenue_forecast
 from app.api import investor_metrics
 from app.api import autonomous_brain

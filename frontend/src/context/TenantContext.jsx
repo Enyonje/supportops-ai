@@ -1,32 +1,40 @@
-import { createContext, useContext, useEffect, useState } from "react";
+// frontend/src/contexts/TenantContext.jsx
+import React, { createContext, useContext, useEffect, useState } from "react";
 import api from "../lib/api";
 
 const TenantContext = createContext(null);
 
-export const TenantProvider = ({ children }) => {
-  const [branding, setBranding] = useState(null);
+export function TenantProvider({ children }) {
+  const [tenant, setTenant] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/tenants/branding", {
-      headers: {
-        "X-Tenant-Domain": window.location.hostname
+    async function loadTenant() {
+      try {
+        const res = await api.get("/tenants/branding");
+        setTenant(res.data);
+
+        // persist tenant id for interceptors
+        if (res.data?.id) {
+          localStorage.setItem("tenant_id", res.data.id);
+        }
+      } catch (err) {
+        console.error("Tenant load failed", err);
+      } finally {
+        setLoading(false);
       }
-    }).then(res => setBranding(res.data));
+    }
+
+    loadTenant();
   }, []);
 
-  if (!branding) return null;
-
   return (
-    <TenantContext.Provider value={branding}>
-      <style>
-        {`:root {
-          --primary: ${branding.primary_color};
-          --accent: ${branding.accent_color};
-        }`}
-      </style>
+    <TenantContext.Provider value={{ tenant, loading }}>
       {children}
     </TenantContext.Provider>
   );
-};
+}
 
-export const useTenant = () => useContext(TenantContext);
+export function useTenant() {
+  return useContext(TenantContext);
+}

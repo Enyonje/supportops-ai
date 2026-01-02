@@ -1,27 +1,60 @@
+// frontend/src/lib/api.js
 import axios from "axios";
-import toast from "react-hot-toast";
 
+/**
+ * Base API instance
+ * Render backend URL is injected via VITE_API_URL
+ */
 const api = axios.create({
-  baseURL: "https://supportops-ai.onrender.com"
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
+  withCredentials: true,
+  timeout: 15000,
 });
 
-api.interceptors.request.use(config => {
-  const tenantId = localStorage.getItem("tenantId");
-  const token = localStorage.getItem("token");
-
-  if (tenantId) config.headers["x-tenant-id"] = tenantId;
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-
-  return config;
-});
-
-api.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response?.status === 429) {
-      toast.error("AI limit reached. Upgrade required.");
+/**
+ * REQUEST INTERCEPTOR
+ * - Attach auth token
+ * - Attach tenant id
+ */
+api.interceptors.request.use(
+  (config) => {
+    // 🔐 Auth token
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return Promise.reject(err);
+
+    // 🏢 Tenant support
+    const tenantId = localStorage.getItem("tenant_id");
+    if (tenantId) {
+      config.headers["X-Tenant-ID"] = tenantId;
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+/**
+ * RESPONSE INTERCEPTOR
+ * - Handle auth errors globally
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+
+    if (status === 401) {
+      console.warn("Unauthorized — logging out");
+      localStorage.removeItem("access_token");
+      window.location.href = "/login";
+    }
+
+    if (status === 403) {
+      console.warn("Forbidden — insufficient permissions");
+    }
+
+    return Promise.reject(error);
   }
 );
 

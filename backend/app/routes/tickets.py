@@ -3,8 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
 from app.database import get_session
-from models.ticket import Ticket
-from models.audit_log import AuditLog
+from app.models.ticket import Ticket
+from app.models.audit_log import AuditLog
 from core.ai import generate_ai_reply
 from core.email import send_email
 from core.audit import log_event

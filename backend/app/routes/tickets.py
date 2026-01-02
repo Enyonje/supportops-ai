@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
-from sqlmodel import Session, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 from app.database import get_session
 from models.ticket import Ticket
@@ -12,14 +13,14 @@ from core.deps import get_current_user
 router = APIRouter(prefix="/api/v1/tickets", tags=["Tickets"])
 
 @router.post("/")
-def create_ticket(
+async def create_ticket(
     ticket: Ticket,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
     user = Depends(get_current_user)
 ):
     session.add(ticket)
-    session.commit()
-    session.refresh(ticket)
+    await session.commit()
+    await session.refresh(ticket)
 
     log_event(
         session,
@@ -36,7 +37,7 @@ def create_ticket(
     ticket.status = "auto-resolved" if ai["confidence"] > 70 else "pending"
 
     session.add(ticket)
-    session.commit()
+    await session.commit()
 
     log_event(
         session,
@@ -64,15 +65,15 @@ def create_ticket(
 
 
 @router.get("/{ticket_id}/timeline")
-def get_ticket_timeline(
+async def get_ticket_timeline(
     ticket_id: int,
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
     user = Depends(get_current_user)
 ):
-    logs = session.exec(
+    result = await session.execute(
         select(AuditLog)
         .where(AuditLog.ticket_id == ticket_id)
         .order_by(AuditLog.created_at)
-    ).all()
-
+    )
+    logs = result.scalars().all()
     return logs

@@ -1,14 +1,17 @@
 from fastapi import APIRouter, Depends
-from sqlmodel import Session, select
-from app.audit.logger import engine
-from app.models.schemas import AuditLog
+from app.database import async_session
+from app.models.audit_log import AuditLog
+from sqlalchemy import select
 
-router = APIRouter()
+router = APIRouter(prefix="/audit", tags=["Audit"])
 
-@router.get("/audit")
-async def get_audit_logs():
-    with Session(engine) as session:
-        # Get the latest 50 logs
-        statement = select(AuditLog).order_by(AuditLog.timestamp.desc()).limit(50)
-        results = session.exec(statement).all()
-        return results
+@router.get("/")
+async def list_audit_logs(tenant=Depends(lambda r: r.state.tenant)):
+    async with async_session() as session:
+        result = await session.execute(
+            select(AuditLog)
+            .where(AuditLog.tenant_id == tenant.id)
+            .order_by(AuditLog.created_at.desc())
+            .limit(500)
+        )
+        return result.scalars().all()

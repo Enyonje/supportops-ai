@@ -1,19 +1,21 @@
 // src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "./context/auth";
-import Navbar from "./components/Navbar";
-import Sidebar from "./components/Sidebar";
-import { RequireAuth, RequireRole } from "./components/RoleGuard";
 
-import LandingPage from "./pages/LandingPage";
-import LoginPage from "./pages/LoginPage";
-import Dashboard from "./pages/Dashboard";
-import ExecutiveDashboard from "./pages/ExecutiveDashboard";
-import AdminAnalytics from "./pages/AdminAnalytics";
-import InvestorMode from "./pages/InvestorMode";
-import RevenueForecast from "./pages/RevenueForecast";
-import AutonomousBrain from "./pages/AutonomousBrain";
-import AnalyticsPage from "./pages/AnalyticsPage";
+// ✅ add .jsx extension and match case exactly
+import Navbar from "./components/Navbar.jsx";
+import Sidebar from "./components/Sidebar.jsx";
+import { RequireAuth, RequireRole } from "./components/RoleGuard.jsx";
+
+import LandingPage from "./pages/LandingPage.jsx";
+import LoginPage from "./pages/LoginPage.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import ExecutiveDashboard from "./pages/ExecutiveDashboard.jsx";
+import AdminAnalytics from "./pages/AdminAnalytics.jsx";
+import InvestorMode from "./pages/InvestorMode.jsx";
+import RevenueForecast from "./pages/RevenueForecast.jsx";
+import AutonomousBrain from "./pages/AutonomousBrain.jsx";
+import AnalyticsPage from "./pages/AnalyticsPage.jsx";
 
 export default function App() {
   const { isAuth } = useAuth();

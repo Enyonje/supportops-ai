@@ -6,7 +6,7 @@ from jose import jwt, JWTError
 from app.database import get_session
 from app.models.ticket import Ticket
 from app.schemas.ticket import TicketCreate, TicketRead
-from app.core.config import settings  # ✅ use the settings object consistently
+from app.core import config   # ✅ import constants directly
 
 router = APIRouter()
 
@@ -16,14 +16,14 @@ async def tickets_websocket(websocket: WebSocket):
     token = websocket.query_params.get("token")
 
     if not token:
-        await websocket.close(code=1008)  # Policy violation
+        await websocket.close(code=1008)
         return
 
     try:
         payload = jwt.decode(
             token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
+            config.SECRET_KEY,
+            algorithms=[config.ALGORITHM],
         )
         user_id = payload.get("sub")
         if not user_id:

@@ -5,11 +5,10 @@ from sqlmodel import Session, select
 
 from app.database import get_session
 from app.models.user import User
+from app.core import config   # ✅ import constants directly
 
-from app.core.config import settings
-
-SECRET_KEY = settings.SECRET_KEY
-ALGORITHM = settings.ALGORITHM
+SECRET_KEY = config.SECRET_KEY
+ALGORITHM = config.ALGORITHM
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 /* AUTH */
 import LoginPage from "./pages/LoginPage";
@@ -27,38 +27,36 @@ import CancelPage from "./pages/CancelPage";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* AUTH */}
-        <Route path="/login" element={<LoginPage />} />
+    <Routes>
+      {/* AUTH */}
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* DEFAULT ENTRY */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* DEFAULT ENTRY */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* DASHBOARDS */}
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/executive" element={<ExecutiveDashboard />} />
-        <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/investor" element={<InvestorMode />} />
+      {/* DASHBOARDS */}
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/executive" element={<ExecutiveDashboard />} />
+      <Route path="/admin/analytics" element={<AdminAnalytics />} />
+      <Route path="/investor" element={<InvestorMode />} />
 
-        {/* AI & OPERATIONS */}
-        <Route path="/ai/brain" element={<AutonomousBrain />} />
-        <Route path="/ai/review-inbox" element={<AIReviewInbox />} />
-        <Route path="/incidents" element={<IncidentCommandCenter />} />
-        <Route path="/playbooks" element={<Playbooks />} />
+      {/* AI & OPERATIONS */}
+      <Route path="/ai/brain" element={<AutonomousBrain />} />
+      <Route path="/ai/review-inbox" element={<AIReviewInbox />} />
+      <Route path="/incidents" element={<IncidentCommandCenter />} />
+      <Route path="/playbooks" element={<Playbooks />} />
 
-        {/* ANALYTICS & FINANCE */}
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/revenue-forecast" element={<RevenueForecast />} />
-        <Route path="/billing" element={<Billing />} />
+      {/* ANALYTICS & FINANCE */}
+      <Route path="/analytics" element={<AnalyticsPage />} />
+      <Route path="/revenue-forecast" element={<RevenueForecast />} />
+      <Route path="/billing" element={<Billing />} />
 
-        {/* PAYMENTS */}
-        <Route path="/success" element={<SuccessPage />} />
-        <Route path="/cancel" element={<CancelPage />} />
+      {/* PAYMENTS */}
+      <Route path="/success" element={<SuccessPage />} />
+      <Route path="/cancel" element={<CancelPage />} />
 
-        {/* 404 FALLBACK */}
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </BrowserRouter>
+      {/* 404 FALLBACK */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
   );
 }

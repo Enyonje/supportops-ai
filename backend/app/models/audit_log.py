@@ -3,6 +3,7 @@ from app.database import Base
 from datetime import datetime
 import uuid
 
+
 class AuditLog(Base):
     __tablename__ = "audit_logs"
 
@@ -15,6 +16,8 @@ class AuditLog(Base):
     action = Column(String, nullable=False)
     resource = Column(String, nullable=False)
 
-    metadata = Column(JSON, nullable=True)
+    # ❌ metadata (reserved by SQLAlchemy)
+    # ✅ renamed to event_metadata
+    event_metadata = Column(JSON, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)

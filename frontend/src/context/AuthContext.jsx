@@ -1,25 +1,39 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import axios from "axios";
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = localStorage.getItem("supportops_user");
-    if (stored) setUser(JSON.parse(stored));
+    const token = localStorage.getItem("token");
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      setUser(JSON.parse(localStorage.getItem("user")));
+    }
     setLoading(false);
   }, []);
 
-  const login = ({ email, role, token }) => {
-    const userData = { email, role, token };
-    localStorage.setItem("supportops_user", JSON.stringify(userData));
-    setUser(userData);
+  const login = async (email, password) => {
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/auth/login`,
+      { email, password }
+    );
+
+    localStorage.setItem("token", res.data.access_token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+    axios.defaults.headers.common[
+      "Authorization"
+    ] = `Bearer ${res.data.access_token}`;
+
+    setUser(res.data.user);
   };
 
   const logout = () => {
-    localStorage.removeItem("supportops_user");
+    localStorage.clear();
+    delete axios.defaults.headers.common["Authorization"];
     setUser(null);
   };
 
@@ -28,6 +42,6 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
 export const useAuth = () => useContext(AuthContext);

@@ -24,6 +24,64 @@ import Billing from "./pages/Billing";
 /* PAYMENTS */
 import SuccessPage from "./pages/SuccessPage";
 import CancelPage from "./pages/CancelPage";
+import { AuthProvider } from "./context/AuthContext";
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute>
+                <AnalyticsPage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/billing"
+            element={
+              <ProtectedRoute role="admin">
+                <Billing />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/investor"
+            element={
+              <ProtectedRoute role="admin">
+                <InvestorMode />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/autonomous-brain"
+            element={
+              <ProtectedRoute>
+                <AutonomousBrain />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
 
 export default function App() {
   return (

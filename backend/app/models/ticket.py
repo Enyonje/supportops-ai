@@ -1,6 +1,8 @@
 from sqlmodel import SQLModel, Field
 from typing import Optional
 from datetime import datetime
+from app.database import Base
+
 
 class Ticket(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

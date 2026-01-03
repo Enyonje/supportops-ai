@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session, select
 from typing import List
 
-from database import get_session
-from models.user import User
-from core.security import hash_password
-from core.deps import require_role
+from app.database import get_session
+from app.models.user import User
+from app.core.security import hash_password
+from app.core.deps import require_role
 
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 

@@ -1,6 +1,6 @@
 from sqlmodel import Session
-from database import engine
-from models.ticket import Ticket
+from app.database import engine
+from app.models.ticket import Ticket
 from ai.analyzer import analyze_ticket
 
 def run_ai_analysis(ticket_id: int):

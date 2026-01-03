@@ -6,10 +6,7 @@ from jose import jwt, JWTError
 from app.database import get_session
 from app.models.ticket import Ticket
 from app.schemas.ticket import TicketCreate, TicketRead
-from app.core.config import settings
-from app.core import config
-
-jwt.decode(token, config.SECRET_KEY, algorithms=[config.ALGORITHM])
+from app.core.config import settings  # ✅ use the settings object consistently
 
 router = APIRouter()
 

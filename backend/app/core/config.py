@@ -1,6 +1,12 @@
-# app/core/config.py
-import os
+from pydantic_settings import BaseSettings
 
-SECRET_KEY = os.getenv("JWT_SECRET", "super-secret-change-me")
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
+class Settings(BaseSettings):
+    SECRET_KEY: str = "super-secret-change-me"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
+
+    class Config:
+        env_file = ".env"
+
+# ✅ instantiate so you can import it elsewhere
+settings = Settings()

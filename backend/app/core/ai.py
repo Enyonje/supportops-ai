@@ -1,5 +1,5 @@
 import random
-from app.services.billing import calculate_revenue
+
 
 def generate_ai_reply(ticket_text: str):
     replies = [

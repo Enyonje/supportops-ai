@@ -1,79 +1,29 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
 from app.database import get_session
 from app.models.ticket import Ticket
-from app.models.audit_log import AuditLog
-from app.core.ai import generate_ai_reply
-from app.core.email import send_email
-from app.core.audit import log_event
-from app.core.deps import get_current_user
+from app.schemas.ticket import TicketCreate, TicketRead
 
-router = APIRouter(prefix="/api/v1/tickets", tags=["Tickets"])
+router = APIRouter()
 
-@router.post("/")
-async def create_ticket(
-    ticket: Ticket,
-    session: AsyncSession = Depends(get_session),
-    user = Depends(get_current_user)
-):
-    session.add(ticket)
+@router.post("/", response_model=TicketRead)
+async def create_ticket(ticket: TicketCreate, session: AsyncSession = Depends(get_session)):
+    new_ticket = Ticket(
+        customer_email=ticket.customer_email,
+        subject=ticket.subject,
+        message=ticket.message,
+        ai_reply=ticket.ai_reply,
+        ai_confidence=ticket.ai_confidence,
+        status=ticket.status,
+    )
+    session.add(new_ticket)
     await session.commit()
-    await session.refresh(ticket)
+    await session.refresh(new_ticket)
+    return new_ticket
 
-    log_event(
-        session,
-        ticket_id=ticket.id,
-        actor="USER",
-        action="TICKET_CREATED",
-        details=f"Subject: {ticket.subject}"
-    )
-
-    ai = generate_ai_reply(ticket.message)
-
-    ticket.ai_reply = ai["reply"]
-    ticket.ai_confidence = ai["confidence"]
-    ticket.status = "auto-resolved" if ai["confidence"] > 70 else "pending"
-
-    session.add(ticket)
-    await session.commit()
-
-    log_event(
-        session,
-        ticket_id=ticket.id,
-        actor="AI",
-        action="AUTO_REPLY_GENERATED",
-        details=f"Confidence {ticket.ai_confidence}%"
-    )
-
-    send_email(
-        to=ticket.customer_email,
-        subject=f"Re: {ticket.subject}",
-        body=ticket.ai_reply
-    )
-
-    log_event(
-        session,
-        ticket_id=ticket.id,
-        actor="SYSTEM",
-        action="EMAIL_SENT",
-        details=f"Sent to {ticket.customer_email}"
-    )
-
+@router.get("/{ticket_id}", response_model=TicketRead)
+async def get_ticket(ticket_id: int, session: AsyncSession = Depends(get_session)):
+    result = await session.execute(select(Ticket).where(Ticket.id == ticket_id))
+    ticket = result.scalar_one()
     return ticket
-
-
-@router.get("/{ticket_id}/timeline")
-async def get_ticket_timeline(
-    ticket_id: int,
-    session: AsyncSession = Depends(get_session),
-    user = Depends(get_current_user)
-):
-    result = await session.execute(
-        select(AuditLog)
-        .where(AuditLog.ticket_id == ticket_id)
-        .order_by(AuditLog.created_at)
-    )
-    logs = result.scalars().all()
-    return logs

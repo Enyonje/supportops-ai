@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import toast, { Toaster } from "react-hot-toast";
 
 /* Pages */
@@ -17,7 +17,7 @@ import CancelPage from "./pages/CancelPage";
 
 export default function App() {
   return (
-    <Router>
+    <>
       <Toaster position="bottom-center" />
 
       <Routes>
@@ -38,6 +38,6 @@ export default function App() {
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/cancel" element={<CancelPage />} />
       </Routes>
-    </Router>
+    </>
   );
 }

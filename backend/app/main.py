@@ -8,10 +8,8 @@ from app.api import revenue_forecast
 from app.api import investor_metrics
 from app.api import autonomous_brain
 
-
 # ✅ CREATE APP FIRST
 app = FastAPI(title="SupportOps AI")
-
 
 # ✅ MIDDLEWARE
 app.add_middleware(
@@ -22,12 +20,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-# ✅ STARTUP EVENT (SYNC FUNCTION)
+# ✅ STARTUP EVENT (ASYNC FUNCTION)
 @app.on_event("startup")
-def startup():
-    create_db_and_tables()
-
+async def on_startup():
+    await create_db_and_tables()
 
 # ✅ ROUTERS (API v1)
 app.include_router(auth.router, prefix="/api/v1")

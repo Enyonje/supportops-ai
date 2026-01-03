@@ -5,7 +5,11 @@ from sqlmodel import Session, select
 
 from app.database import get_session
 from app.models.user import User
-from app.core.config import SECRET_KEY, ALGORITHM
+
+from app.core.config import settings
+
+SECRET_KEY = settings.SECRET_KEY
+ALGORITHM = settings.ALGORITHM
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 

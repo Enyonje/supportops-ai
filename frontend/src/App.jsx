@@ -1,120 +1,95 @@
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
-/* AUTH */
 import LoginPage from "./pages/LoginPage";
-
-/* CORE DASHBOARDS */
 import Dashboard from "./pages/Dashboard";
 import ExecutiveDashboard from "./pages/ExecutiveDashboard";
-import AdminAnalytics from "./pages/AdminAnalytics";
 import InvestorMode from "./pages/InvestorMode";
-
-/* AI & OPERATIONS */
-import AutonomousBrain from "./pages/AutonomousBrain";
-import AIReviewInbox from "./pages/AIReviewInbox";
-import IncidentCommandCenter from "./pages/IncidentCommandCenter";
-import Playbooks from "./pages/Playbooks";
-
-/* ANALYTICS & FINANCE */
-import AnalyticsPage from "./pages/AnalyticsPage";
 import RevenueForecast from "./pages/RevenueForecast";
-import Billing from "./pages/Billing";
+import AutonomousBrain from "./pages/AutonomousBrain";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
-/* PAYMENTS */
-import SuccessPage from "./pages/SuccessPage";
-import CancelPage from "./pages/CancelPage";
-import { AuthProvider } from "./context/AuthContext";
+import Navbar from "./components/Navbar";
 
-export default function App() {
-  return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/analytics"
-            element={
-              <ProtectedRoute>
-                <AnalyticsPage />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/billing"
-            element={
-              <ProtectedRoute role="admin">
-                <Billing />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/investor"
-            element={
-              <ProtectedRoute role="admin">
-                <InvestorMode />
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/autonomous-brain"
-            element={
-              <ProtectedRoute>
-                <AutonomousBrain />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
-  );
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem("access_token");
+  return token ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(false);
+
+  useEffect(() => {
+    setAuthenticated(!!localStorage.getItem("access_token"));
+  }, []);
+
   return (
-    <Routes>
-      {/* AUTH */}
-      <Route path="/login" element={<LoginPage />} />
+    <BrowserRouter>
+      {authenticated && <Navbar />}
 
-      {/* DEFAULT ENTRY */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      <Routes>
+        {/* PUBLIC */}
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/login" element={<LoginPage />} />
 
-      {/* DASHBOARDS */}
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/executive" element={<ExecutiveDashboard />} />
-      <Route path="/admin/analytics" element={<AdminAnalytics />} />
-      <Route path="/investor" element={<InvestorMode />} />
+        {/* PROTECTED */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* AI & OPERATIONS */}
-      <Route path="/ai/brain" element={<AutonomousBrain />} />
-      <Route path="/ai/review-inbox" element={<AIReviewInbox />} />
-      <Route path="/incidents" element={<IncidentCommandCenter />} />
-      <Route path="/playbooks" element={<Playbooks />} />
+        <Route
+          path="/executive"
+          element={
+            <ProtectedRoute>
+              <ExecutiveDashboard />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* ANALYTICS & FINANCE */}
-      <Route path="/analytics" element={<AnalyticsPage />} />
-      <Route path="/revenue-forecast" element={<RevenueForecast />} />
-      <Route path="/billing" element={<Billing />} />
+        <Route
+          path="/investor"
+          element={
+            <ProtectedRoute>
+              <InvestorMode />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* PAYMENTS */}
-      <Route path="/success" element={<SuccessPage />} />
-      <Route path="/cancel" element={<CancelPage />} />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <AnalyticsPage />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* 404 FALLBACK */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+        <Route
+          path="/revenue"
+          element={
+            <ProtectedRoute>
+              <RevenueForecast />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/brain"
+          element={
+            <ProtectedRoute>
+              <AutonomousBrain />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* FALLBACK */}
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }

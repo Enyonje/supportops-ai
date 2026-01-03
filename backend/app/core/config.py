@@ -1,4 +1,4 @@
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     SECRET_KEY: str = "super-secret-change-me"
@@ -6,7 +6,6 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24
 
     class Config:
-        env_file = ".env"   # load values from a .env file if present
+        env_file = ".env"
 
-# ✅ instantiate settings so you can import it anywhere
 settings = Settings()

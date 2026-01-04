@@ -1,20 +1,20 @@
 // src/context/auth.jsx
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(null);
-  const [role, setRole] = useState("user"); // default
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const t = localStorage.getItem("access_token");
-    const r = localStorage.getItem("role"); // set at login
-    setToken(t || null);
-    setRole(r || "user");
+    const r = localStorage.getItem("role");
+    setToken(t);
+    setRole(r);
   }, []);
 
-  const login = (newToken, userRole = "user") => {
+  const login = (newToken, userRole) => {
     localStorage.setItem("access_token", newToken);
     localStorage.setItem("role", userRole);
     setToken(newToken);
@@ -22,16 +22,16 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("role");
+    localStorage.clear();
     setToken(null);
-    setRole("user");
+    setRole(null);
   };
 
-  const value = useMemo(() => ({ token, role, login, logout, isAuth: !!token }), [token, role]);
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{ token, role, login, logout, isAuth: !!token }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
-}
+export const useAuth = () => useContext(AuthContext);

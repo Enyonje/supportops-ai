@@ -1,14 +1,15 @@
-// src/components/RoleGuard.jsx
 import { Navigate } from "react-router-dom";
-import { useAuth } from "../context/auth";
+import { useAuth } from "../context/AuthProvider.jsx";
 
 export function RequireAuth({ children }) {
   const { isAuth } = useAuth();
-  return isAuth ? children : <Navigate to="/login" replace />;
+  if (!isAuth) return <Navigate to="/login" replace />;
+  return children;
 }
 
-export function RequireRole({ roles = [], children }) {
-  const { isAuth, role } = useAuth();
+export function RequireRole({ roles, children }) {
+  const { isAuth, user } = useAuth();
   if (!isAuth) return <Navigate to="/login" replace />;
-  return roles.includes(role) ? children : <Navigate to="/dashboard" replace />;
+  if (!user?.role || !roles.includes(user.role)) return <Navigate to="/" replace />;
+  return children;
 }

@@ -1,103 +1,75 @@
-// src/App.jsx
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/auth";
-
-// ✅ add .jsx extension and match case exactly
-import Navbar from "./components/Navbar.jsx";
-import Sidebar from "./components/Sidebar.jsx";
-import { RequireAuth, RequireRole } from "./components/RoleGuard.jsx";
-
+import { useAuth } from "./context/AuthProvider.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
+import SignupPage from "./pages/SignupPage.jsx";
+import CancelPage from "./pages/CancelPage.jsx";
+import SuccessPage from "./pages/SuccessPage.jsx";
+import FeaturesPage from "./pages/FeaturesPage.jsx";
+
+// Layouts
+import AgentLayout from "./layouts/AgentLayout.jsx";
+import AdminLayout from "./layouts/AdminLayout.jsx";
+import InvestorLayout from "./layouts/InvestorLayout.jsx";
+
+// Agent pages
 import Dashboard from "./pages/Dashboard.jsx";
-import ExecutiveDashboard from "./pages/ExecutiveDashboard.jsx";
-import AdminAnalytics from "./pages/AdminAnalytics.jsx";
-import InvestorMode from "./pages/InvestorMode.jsx";
+import AnalyticsPage from "./pages/AnalyticsPage.jsx";
 import RevenueForecast from "./pages/RevenueForecast.jsx";
 import AutonomousBrain from "./pages/AutonomousBrain.jsx";
-import AnalyticsPage from "./pages/AnalyticsPage.jsx";
+import AIReviewInbox from "./pages/AIReviewInbox.jsx";
+import Billing from "./pages/Billing.jsx";
+import Playbooks from "./pages/Playbooks.jsx";
+
+// Admin pages
+import ExecutiveDashboard from "./pages/ExecutiveDashboard.jsx";
+import AdminAnalytics from "./pages/AdminAnalytics.jsx";
+import IncidentCommandCenter from "./pages/IncidentCommandCenter.jsx";
+
+// Investor pages
+import InvestorMode from "./pages/InvestorMode.jsx";
 
 export default function App() {
-  const { isAuth } = useAuth();
+  const { isAuth } = useAuth() || {};
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white">
-      {isAuth && <Navbar />}
-      <div className="flex">
-        {isAuth && <Sidebar />}
-        <main className="flex-1 p-4 md:p-8">
-          <Routes>
-            {/* Public */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
+    <div className="min-h-screen bg-ink">
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/cancel" element={<CancelPage />} />
+        <Route path="/success" element={<SuccessPage />} />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/features" element={<FeaturesPage />} />
 
-            {/* Protected: user */}
-            <Route
-              path="/dashboard"
-              element={
-                <RequireAuth>
-                  <Dashboard />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/analytics"
-              element={
-                <RequireAuth>
-                  <AnalyticsPage />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/revenue"
-              element={
-                <RequireAuth>
-                  <RevenueForecast />
-                </RequireAuth>
-              }
-            />
-            <Route
-              path="/brain"
-              element={
-                <RequireAuth>
-                  <AutonomousBrain />
-                </RequireAuth>
-              }
-            />
+        {/* Agent layout */}
+        <Route path="/agent" element={<AgentLayout />}>
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="analytics" element={<AnalyticsPage />} />
+          <Route path="revenue" element={<RevenueForecast />} />
+          <Route path="brain" element={<AutonomousBrain />} />
+          <Route path="inbox" element={<AIReviewInbox />} />
+          <Route path="billing" element={<Billing />} />
+          <Route path="playbooks" element={<Playbooks />} />
+        </Route>
 
-            {/* Protected: admin */}
-            <Route
-              path="/executive"
-              element={
-                <RequireRole roles={["admin"]}>
-                  <ExecutiveDashboard />
-                </RequireRole>
-              }
-            />
-            <Route
-              path="/admin/analytics"
-              element={
-                <RequireRole roles={["admin"]}>
-                  <AdminAnalytics />
-                </RequireRole>
-              }
-            />
+        {/* Admin layout */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="executive" element={<ExecutiveDashboard />} />
+          <Route path="analytics" element={<AdminAnalytics />} />
+          <Route path="incidents" element={<IncidentCommandCenter />} />
+        </Route>
 
-            {/* Protected: investor */}
-            <Route
-              path="/investor"
-              element={
-                <RequireRole roles={["investor", "admin"]}>
-                  <InvestorMode />
-                </RequireRole>
-              }
-            />
+        {/* Investor layout */}
+        <Route path="/investor" element={<InvestorLayout />}>
+          <Route index element={<InvestorMode />} />
+        </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-      </div>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }

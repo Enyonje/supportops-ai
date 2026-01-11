@@ -1,5 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
+// ✅ assign env var to a constant
+const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
@@ -42,16 +45,17 @@ export function AuthProvider({ children }) {
     return { access_token: accessToken, role: userRole, user: userObj };
   };
 
-  // Signup: call backend, then reuse login
+  // Signup: call backend /register, then reuse login
   const signup = async ({ email, password, name }) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_BACKEND_API_URL}/api/v1/auth/signup`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
-      }
-    );
+    if (!API_BASE_URL) {
+      throw new Error("Backend API URL is not defined. Check your .env file.");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password, name }),
+    });
 
     if (!res.ok) {
       throw new Error("Signup failed");
@@ -76,7 +80,7 @@ export function AuthProvider({ children }) {
     role,
     user,
     login,
-    signup, // ✅ now available in context
+    signup,
     logout,
     isAuth: !!token,
   };

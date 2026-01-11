@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth.jsx";
 
 export default function SignupPage() {
-  const { signup } = useAuth(); // ✅ now available from context
+  const { signup } = useAuth(); // ✅ provided by context
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");

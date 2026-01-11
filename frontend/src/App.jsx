@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/AuthProvider.jsx";
+import { useAuth } from "./context/auth.jsx"; // ✅ match actual filename (auth.jsx)
 
-/* Public pages */
+// ---------- Public pages ----------
 import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
@@ -9,12 +9,12 @@ import CancelPage from "./pages/CancelPage.jsx";
 import SuccessPage from "./pages/SuccessPage.jsx";
 import FeaturesPage from "./pages/FeaturesPage.jsx";
 
-/* Layouts */
+// ---------- Layouts ----------
 import AgentLayout from "./layouts/AgentLayout.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import InvestorLayout from "./layouts/InvestorLayout.jsx";
 
-/* Agent pages */
+// ---------- Agent pages ----------
 import Dashboard from "./pages/Dashboard.jsx";
 import AnalyticsPage from "./pages/AnalyticsPage.jsx";
 import RevenueForecast from "./pages/RevenueForecast.jsx";
@@ -23,17 +23,22 @@ import AIReviewInbox from "./pages/AIReviewInbox.jsx";
 import Billing from "./pages/Billing.jsx";
 import Playbooks from "./pages/Playbooks.jsx";
 
-/* Admin pages */
+// ---------- Admin pages ----------
 import ExecutiveDashboard from "./pages/ExecutiveDashboard.jsx";
 import AdminAnalytics from "./pages/AdminAnalytics.jsx";
 import IncidentCommandCenter from "./pages/IncidentCommandCenter.jsx";
 
-/* Investor pages */
+// ---------- Investor pages ----------
 import InvestorMode from "./pages/InvestorMode.jsx";
 
-/* ---------- Protected Route Wrapper ---------- */
+// ---------- Protected Route Wrapper ----------
 function ProtectedRoute({ children }) {
-  const { isAuth } = useAuth();
+  const auth = useAuth();
+  if (!auth) {
+    // ✅ graceful fallback if provider not initialized
+    return <Navigate to="/login" replace />;
+  }
+  const { isAuth } = auth;
   return isAuth ? children : <Navigate to="/login" replace />;
 }
 

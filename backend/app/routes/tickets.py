@@ -1,33 +1,25 @@
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from jose import jwt, JWTError
-
-from app.database import get_session
-from app.models.ticket import Ticket
-from app.schemas.ticket import TicketCreate, TicketRead
-from app.core import config   # ✅ import constants directly
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from jose import JWTError, jwt
+from app.core.config import settings
 
 router = APIRouter()
 
-# ---------------- WebSocket ----------------
 @router.websocket("/ws/tickets")
-async def tickets_websocket(websocket: WebSocket):
-    token = websocket.query_params.get("token")
-
-    if not token:
-        await websocket.close(code=1008)
-        return
-
+async def tickets_ws(
+    websocket: WebSocket,
+    token: str = Query(...)
+):
     try:
         payload = jwt.decode(
             token,
-            config.SECRET_KEY,
-            algorithms=[config.ALGORITHM],
+            settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
         )
-        user_id = payload.get("sub")
-        if not user_id:
-            raise JWTError()
+        user_id: str = payload.get("sub")
+        if user_id is None:
+            await websocket.close(code=1008)
+            return
+
     except JWTError:
         await websocket.close(code=1008)
         return
@@ -36,31 +28,7 @@ async def tickets_websocket(websocket: WebSocket):
 
     try:
         while True:
-            message = await websocket.receive_text()
-            await websocket.send_text(f"received: {message}")
+            data = await websocket.receive_text()
+            await websocket.send_text(f"ACK: {data}")
     except WebSocketDisconnect:
-        print(f"WebSocket disconnected: user={user_id}")
-
-
-# ---------------- REST Endpoints ----------------
-@router.post("/", response_model=TicketRead)
-async def create_ticket(ticket: TicketCreate, session: AsyncSession = Depends(get_session)):
-    new_ticket = Ticket(
-        customer_email=ticket.customer_email,
-        subject=ticket.subject,
-        message=ticket.message,
-        ai_reply=ticket.ai_reply,
-        ai_confidence=ticket.ai_confidence,
-        status=ticket.status,
-    )
-    session.add(new_ticket)
-    await session.commit()
-    await session.refresh(new_ticket)
-    return new_ticket
-
-
-@router.get("/{ticket_id}", response_model=TicketRead)
-async def get_ticket(ticket_id: int, session: AsyncSession = Depends(get_session)):
-    result = await session.execute(select(Ticket).where(Ticket.id == ticket_id))
-    ticket = result.scalar_one()
-    return ticket
+        print("WebSocket disconnected")

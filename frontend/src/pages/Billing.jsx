@@ -1,49 +1,116 @@
-import { useEffect, useState } from "react";
 import api from "../lib/api";
-import { CreditCard } from "lucide-react";
+
+const plans = [
+  {
+    name: "Starter",
+    price: "$29",
+    interval: "month",
+    features: [
+      "AI Ticket Resolution",
+      "Basic Analytics",
+      "1 Agent Seat",
+      "Email Support",
+    ],
+    priceId: "price_starter", // Stripe Price ID
+  },
+  {
+    name: "Pro",
+    price: "$99",
+    interval: "month",
+    highlight: true,
+    features: [
+      "Everything in Starter",
+      "AI Inbox Automation",
+      "Predictive Analytics",
+      "5 Agent Seats",
+      "Priority Support",
+    ],
+    priceId: "price_pro",
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    interval: "",
+    features: [
+      "Unlimited Agents",
+      "Dedicated AI Models",
+      "SLA & Compliance",
+      "Investor Dashboard",
+      "Dedicated Support",
+    ],
+    priceId: "price_enterprise",
+  },
+];
 
 export default function Billing() {
-  const [usage, setUsage] = useState([]);
-
-  useEffect(() => {
-    api
-      .get("/billing/usage")
-      .then((res) => setUsage(res.data))
-      .catch((err) => console.error("Failed to load billing usage", err));
-  }, []);
+  async function subscribe(priceId) {
+    try {
+      const { data } = await api.post("/billing/create-checkout-session", {
+        price_id: priceId,
+      });
+      window.location.href = data.checkout_url;
+    } catch (err) {
+      console.error(err);
+      alert("Unable to start checkout.");
+    }
+  }
 
   return (
-    <div className="space-y-8 p-8 text-white">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-white/10 pb-4">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-          Billing & Usage
+    <main className="p-8 max-w-7xl mx-auto">
+      <header className="text-center mb-12">
+        <h1 className="text-3xl font-bold text-white">
+          Choose Your Plan
         </h1>
-      </div>
+        <p className="text-slate-400 mt-2">
+          Scale support operations with confidence
+        </p>
+      </header>
 
-      {/* Usage grid */}
-      {usage.length === 0 ? (
-        <div className="rounded-xl border border-white/10 bg-white/5 p-8 text-center text-gray-400">
-          No usage data available.
-        </div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {usage.map((u, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between rounded-2xl bg-white/5 border border-white/10 p-6 hover:bg-white/10 transition"
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {plans.map((plan) => (
+          <div
+            key={plan.name}
+            className={`rounded-2xl p-6 border ${
+              plan.highlight
+                ? "border-blue-500 bg-blue-500/10"
+                : "border-white/10 bg-white/5"
+            } backdrop-blur-xl`}
+          >
+            <h2 className="text-xl font-semibold text-white">
+              {plan.name}
+            </h2>
+
+            <p className="text-3xl font-bold text-white mt-4">
+              {plan.price}
+              <span className="text-sm text-slate-400">
+                {plan.interval && ` / ${plan.interval}`}
+              </span>
+            </p>
+
+            <ul className="mt-6 space-y-3">
+              {plan.features.map((f) => (
+                <li
+                  key={f}
+                  className="text-slate-300 text-sm"
+                >
+                  ✓ {f}
+                </li>
+              ))}
+            </ul>
+
+            <button
+              onClick={() => subscribe(plan.priceId)}
+              className={`mt-8 w-full py-3 rounded-lg font-semibold transition ${
+                plan.highlight
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
             >
-              <div>
-                <h3 className="text-lg font-semibold text-white">{u.metric}</h3>
-                <p className="text-sm text-slate-400">
-                  {u.quantity} units this month
-                </p>
-              </div>
-              <CreditCard className="text-blue-500" size={24} />
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+              Get Started
+            </button>
+          </div>
+        ))}
+      </section>
+    </main>
   );
 }

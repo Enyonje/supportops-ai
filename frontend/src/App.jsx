@@ -1,108 +1,87 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { useAuth } from "./context/auth.jsx"; // ✅ match actual filename (auth.jsx)
+import { useAuth } from "./context/AuthProvider";
 
-// ---------- Public pages ----------
-import LandingPage from "./pages/LandingPage.jsx";
-import LoginPage from "./pages/LoginPage.jsx";
-import SignupPage from "./pages/SignupPage.jsx";
-import CancelPage from "./pages/CancelPage.jsx";
-import SuccessPage from "./pages/SuccessPage.jsx";
-import FeaturesPage from "./pages/FeaturesPage.jsx";
+// Pages
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import FeaturesPage from "./pages/FeaturesPage";
 
-// ---------- Layouts ----------
-import AgentLayout from "./layouts/AgentLayout.jsx";
-import AdminLayout from "./layouts/AdminLayout.jsx";
-import InvestorLayout from "./layouts/InvestorLayout.jsx";
+// Layouts
+import AgentLayout from "./layouts/AgentLayout";
+import AdminLayout from "./layouts/AdminLayout";
+import InvestorLayout from "./layouts/InvestorLayout";
 
-// ---------- Agent pages ----------
-import Dashboard from "./pages/Dashboard.jsx";
-import AnalyticsPage from "./pages/AnalyticsPage.jsx";
-import RevenueForecast from "./pages/RevenueForecast.jsx";
-import AutonomousBrain from "./pages/AutonomousBrain.jsx";
-import AIReviewInbox from "./pages/AIReviewInbox.jsx";
-import Billing from "./pages/Billing.jsx";
-import Playbooks from "./pages/Playbooks.jsx";
+// Agent
+import Dashboard from "./pages/Dashboard";
+import AnalyticsPage from "./pages/AnalyticsPage";
 
-// ---------- Admin pages ----------
-import ExecutiveDashboard from "./pages/ExecutiveDashboard.jsx";
-import AdminAnalytics from "./pages/AdminAnalytics.jsx";
-import IncidentCommandCenter from "./pages/IncidentCommandCenter.jsx";
+// Admin
+import ExecutiveDashboard from "./pages/ExecutiveDashboard";
 
-// ---------- Investor pages ----------
-import InvestorMode from "./pages/InvestorMode.jsx";
+// Investor
+import InvestorMode from "./pages/InvestorMode";
 
-// ---------- Protected Route Wrapper ----------
-function ProtectedRoute({ children }) {
-  const auth = useAuth();
-  if (!auth) {
-    // ✅ graceful fallback if provider not initialized
-    return <Navigate to="/login" replace />;
-  }
-  const { isAuth } = auth;
-  return isAuth ? children : <Navigate to="/login" replace />;
-}
+// Guards
+import ProtectedRoute from "./components/ProtectedRoute";
 
 export default function App() {
+  const { isAuth, user } = useAuth();
+
   return (
-    <div className="min-h-screen bg-ink">
-      <Routes>
-        {/* ---------- PUBLIC ---------- */}
-        <Route index element={<LandingPage />} />
-        <Route path="/features" element={<FeaturesPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/cancel" element={<CancelPage />} />
-        <Route path="/success" element={<SuccessPage />} />
+    <Routes>
+      {/* Public */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/features" element={<FeaturesPage />} />
 
-        {/* ---------- AGENT ---------- */}
-        <Route
-          path="/agent"
-          element={
-            <ProtectedRoute>
-              <AgentLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="analytics" element={<AnalyticsPage />} />
-          <Route path="revenue" element={<RevenueForecast />} />
-          <Route path="brain" element={<AutonomousBrain />} />
-          <Route path="inbox" element={<AIReviewInbox />} />
-          <Route path="billing" element={<Billing />} />
-          <Route path="playbooks" element={<Playbooks />} />
-        </Route>
+      <Route
+        path="/login"
+        element={isAuth ? <Navigate to="/agent/dashboard" /> : <LoginPage />}
+      />
+      <Route
+        path="/signup"
+        element={isAuth ? <Navigate to="/agent/dashboard" /> : <SignupPage />}
+      />
 
-        {/* ---------- ADMIN ---------- */}
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AdminLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Navigate to="executive" replace />} />
-          <Route path="executive" element={<ExecutiveDashboard />} />
-          <Route path="analytics" element={<AdminAnalytics />} />
-          <Route path="incidents" element={<IncidentCommandCenter />} />
-        </Route>
+      {/* Agent */}
+      <Route
+        path="/agent"
+        element={
+          <ProtectedRoute>
+            <AgentLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
+      </Route>
 
-        {/* ---------- INVESTOR ---------- */}
-        <Route
-          path="/investor"
-          element={
-            <ProtectedRoute>
-              <InvestorLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<InvestorMode />} />
-        </Route>
+      {/* Admin */}
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="executive" element={<ExecutiveDashboard />} />
+      </Route>
 
-        {/* ---------- FALLBACK ---------- */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </div>
+      {/* Investor */}
+      <Route
+        path="/investor"
+        element={
+          <ProtectedRoute>
+            <InvestorLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<InvestorMode />} />
+      </Route>
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }

@@ -1,49 +1,19 @@
-@import "tailwindcss";
-
-@theme {
-  /* This explicitly tells Tailwind to create the 'bg-midnight' utility */
-  --color-midnight: #020617;
-  --color-panel: #0f172a;
-  --color-accent: #3b82f6;
-  
-  /* Adds depth for a professional look */
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   color-scheme: dark;
 }
 
 body {
-  /* Apply the theme variables here */
-  background-color: var(--color-midnight);
+  background-color: #020617;
   color: #f1f5f9;
   margin: 0;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Ensure the app container takes full height */
 #root {
   min-height: 100vh;
-  background-color: var(--color-midnight);
-}
-
-@media print {
-  /* Hide UI elements we don't want in the PDF */
-  aside, footer, button, .no-print {
-    display: none !important;
-  }
-  
-  /* Reset background for printer friendliness if desired, 
-     or keep it dark for the 'Tech' look */
-  body {
-    background: #020617 !important;
-    -webkit-print-color-adjust: exact;
-  }
-
-  main {
-    margin: 0 !important;
-    padding: 20px !important;
-  }
 }

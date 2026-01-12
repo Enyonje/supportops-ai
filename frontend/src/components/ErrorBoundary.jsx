@@ -1,11 +1,22 @@
-import { Component } from "react";
-export default class ErrorBoundary extends Component {
-  constructor(props) { super(props); this.state = { hasError: false }; }
-  static getDerivedStateFromError() { return { hasError: true }; }
-  componentDidCatch(err, info) { console.error(err, info); }
+import React from "react";
+
+export default class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("ErrorBoundary caught:", error, errorInfo);
+  }
+
   render() {
     if (this.state.hasError) {
-      return <div className="card p-4">Something went wrong. Try refreshing.</div>;
+      return <h2>Something went wrong.</h2>;
     }
     return this.props.children;
   }

@@ -17,6 +17,7 @@ protobuf==6.33.2
 psycopg2-binary==2.9.11
 pydantic==2.12.5
 pydantic_core==2.41.5
+pydantic-settings==2.2.1   # ✅ Added for BaseSettings support
 SQLAlchemy==2.0.45
 sqlmodel==0.0.31
 starlette==0.50.0

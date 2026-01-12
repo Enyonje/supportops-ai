@@ -1,6 +1,6 @@
 # app/core/config.py
 import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # JWT / Auth
@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
 
     class Config:
-        env_file = ".env"   # load variables from .env if present
+        env_file = ".env"
 
-# ✅ This is what your routes should import
 settings = Settings()

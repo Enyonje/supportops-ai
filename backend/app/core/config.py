@@ -1,21 +1,21 @@
 # app/core/config.py
-import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     # JWT / Auth
-    SECRET_KEY: str = os.getenv("JWT_SECRET", "super-secret-change-me")
+    SECRET_KEY: str = "super-secret-change-me"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 
     # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
+    DATABASE_URL: str = "sqlite:///./test.db"
 
     # General
-    PROJECT_NAME: str = os.getenv("PROJECT_NAME", "SupportOps API")
-    DEBUG: bool = os.getenv("DEBUG", "False").lower() == "true"
+    PROJECT_NAME: str = "SupportOps API"
+    DEBUG: bool = False
 
-    class Config:
-        env_file = ".env"
+    # Tell Pydantic to load from .env and environment variables
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
+# Instantiate settings once and import everywhere
 settings = Settings()

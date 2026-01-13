@@ -1,16 +1,22 @@
-from fastapi import APIRouter
-from app.models.schemas import ZendeskEvent
-from app.temporal_config import get_client # Change this line
+from fastapi import APIRouter, Request
+import stripe
+from app.core.config import settings
 
 router = APIRouter()
 
-@router.post("/webhooks/zendesk")
-async def handle_zendesk_webhook(event: ZendeskEvent):
-    client = await get_client() # Get the initialized client
-    await client.start_workflow(
-        "SupportTicketWorkflow",
-        arg=event.dict(),
-        id=f"ticket-{event.id}",
-        task_queue="support-tasks"
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+@router.post("/stripe/webhook")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig = request.headers.get("stripe-signature")
+
+    event = stripe.Webhook.construct_event(
+        payload, sig, settings.STRIPE_WEBHOOK_SECRET
     )
-    return {"status": "workflow_started", "id": event.id}
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+        # mark user as paid, assign plan
+
+    return {"status": "ok"}

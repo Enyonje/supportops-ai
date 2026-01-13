@@ -1,27 +1,28 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
-from jose import JWTError, jwt
-from app.core.config import settings
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, status
+from jose import JWTError
+from app.core.security import decode_access_token
 
 router = APIRouter()
 
-@router.websocket("/ws/tickets")
-async def tickets_ws(
-    websocket: WebSocket,
-    token: str = Query(...)
-):
-    try:
-        payload = jwt.decode(
-            token,
-            settings.SECRET_KEY,
-            algorithms=[settings.ALGORITHM],
-        )
-        user_id: str = payload.get("sub")
-        if user_id is None:
-            await websocket.close(code=1008)
-            return
 
-    except JWTError:
-        await websocket.close(code=1008)
+@router.websocket("/ws/tickets")
+async def tickets_ws(websocket: WebSocket):
+    """
+    JWT-secured WebSocket for live ticket updates
+    Token is passed as:
+    ws://host/ws/tickets?token=JWT
+    """
+
+    token = websocket.query_params.get("token")
+
+    if not token:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
+    try:
+        user_id = decode_access_token(token)
+    except Exception:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
 
     await websocket.accept()
@@ -29,6 +30,13 @@ async def tickets_ws(
     try:
         while True:
             data = await websocket.receive_text()
-            await websocket.send_text(f"ACK: {data}")
+
+            # Example response (replace with real logic)
+            await websocket.send_json({
+                "event": "ticket_update",
+                "user_id": user_id,
+                "message": data,
+            })
+
     except WebSocketDisconnect:
-        print("WebSocket disconnected")
+        print(f"WebSocket disconnected: user={user_id}")

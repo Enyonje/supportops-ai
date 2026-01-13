@@ -4,34 +4,16 @@ from datetime import datetime
 
 
 class User(SQLModel, table=True):
-    __tablename__ = "users"
-
-    # 🔑 Primary Key
     id: Optional[int] = Field(default=None, primary_key=True)
 
-    # 👤 Identity
-    email: str = Field(
-        index=True,
-        unique=True,
-        nullable=False,
-        sa_column_kwargs={"unique": True},
-    )
+    email: str = Field(index=True, unique=True)
     hashed_password: str
 
-    # 🧑‍💼 Access Control
-    role: str = Field(default="viewer")  
-    # viewer | agent | admin | investor | management
+    role: str = Field(default="agent")  
+    # admin | agent | viewer
 
-    is_active: bool = Field(default=False)
+    plan: str = Field(default="free")
+    # free | pro | business
 
-    # 💳 Stripe / Billing
-    stripe_customer_id: Optional[str] = Field(default=None, index=True)
-    subscription_status: str = Field(default="inactive")
-    # inactive | active | past_due | canceled
-
-    # 🕒 Metadata
+    is_active: bool = True
     created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(
-        default_factory=datetime.utcnow,
-        nullable=False,
-    )

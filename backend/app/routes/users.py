@@ -9,6 +9,15 @@ from app.core.deps import require_role
 
 router = APIRouter(prefix="/api/v1/users", tags=["Users"])
 
+@router.get("/")
+def list_users(
+    admin: User = Depends(require_admin),
+):
+    return [
+        {"email": "agent@demo.com", "plan": "pro"},
+        {"email": "admin@demo.com", "plan": "business"},
+    ]
+
 @router.get("/", response_model=List[User])
 def list_users(
     session: Session = Depends(get_session),

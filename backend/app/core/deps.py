@@ -7,9 +7,9 @@ from app.database import get_session
 from app.models.user import User
 from app.core.config import settings   # ✅ import the settings instance
 
-# pull values from settings
-SECRET_KEY = settings.SECRET_KEY
-ALGORITHM = settings.ALGORITHM
+# pull values from settings (match config.py field names)
+SECRET_KEY = settings.JWT_SECRET
+ALGORITHM = settings.JWT_ALGORITHM
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 

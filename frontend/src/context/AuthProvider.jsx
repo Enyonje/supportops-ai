@@ -10,47 +10,41 @@ export function AuthProvider({ children }) {
   // Restore session
   useEffect(() => {
     const token = localStorage.getItem("access_token");
-    const savedUser = localStorage.getItem("user");
+    const storedUser = localStorage.getItem("user");
 
-    if (token && savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (token && storedUser) {
+      setUser(JSON.parse(storedUser));
     }
-
     setLoading(false);
   }, []);
 
-  const login = async ({ email, password }) => {
-    const res = await api.post("/auth/login", { email, password });
+  async function login(credentials) {
+    const res = await api.post("/auth/login", credentials);
 
-    const data = res.data;
+    const { access_token, user } = res.data;
 
-    localStorage.setItem("access_token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.user));
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("user", JSON.stringify(user));
 
-    setUser(data.user);
-    return data;
-  };
+    setUser(user);
+    return user;
+  }
 
-  const signup = async (payload) => {
-    const res = await api.post("/auth/register", payload);
-    return res.data;
-  };
-
-  const logout = () => {
-    localStorage.clear();
+  function logout() {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
     setUser(null);
-    window.location.href = "/login";
-  };
+    window.location.href = "/";
+  }
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuth: !!user,
-        loading,
         login,
-        signup,
         logout,
+        loading,
+        isAuth: !!user,
       }}
     >
       {children}

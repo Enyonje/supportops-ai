@@ -1,116 +1,96 @@
 import api from "../lib/api";
 
-const plans = [
-  {
-    name: "Starter",
-    price: "$29",
-    interval: "month",
-    features: [
-      "AI Ticket Resolution",
-      "Basic Analytics",
-      "1 Agent Seat",
-      "Email Support",
-    ],
-    priceId: "price_starter", // Stripe Price ID
-  },
-  {
-    name: "Pro",
-    price: "$99",
-    interval: "month",
-    highlight: true,
-    features: [
-      "Everything in Starter",
-      "AI Inbox Automation",
-      "Predictive Analytics",
-      "5 Agent Seats",
-      "Priority Support",
-    ],
-    priceId: "price_pro",
-  },
-  {
-    name: "Enterprise",
-    price: "Custom",
-    interval: "",
-    features: [
-      "Unlimited Agents",
-      "Dedicated AI Models",
-      "SLA & Compliance",
-      "Investor Dashboard",
-      "Dedicated Support",
-    ],
-    priceId: "price_enterprise",
-  },
-];
-
 export default function Billing() {
-  async function subscribe(priceId) {
+  async function subscribe(plan) {
     try {
-      const { data } = await api.post("/billing/create-checkout-session", {
-        price_id: priceId,
+      const res = await api.post("/billing/create-checkout-session", {
+        plan,
       });
-      window.location.href = data.checkout_url;
+
+      window.location.href = res.data.url;
     } catch (err) {
       console.error(err);
-      alert("Unable to start checkout.");
+      alert("Unable to start checkout");
     }
   }
 
-  return (
-    <main className="p-8 max-w-7xl mx-auto">
-      <header className="text-center mb-12">
-        <h1 className="text-3xl font-bold text-white">
-          Choose Your Plan
-        </h1>
-        <p className="text-slate-400 mt-2">
-          Scale support operations with confidence
-        </p>
-      </header>
+  const plans = [
+    {
+      name: "Starter",
+      price: "$29 / month",
+      planId: "starter",
+      features: [
+        "AI Inbox",
+        "Auto Ticket Resolution",
+        "Basic Analytics",
+        "Email Support",
+      ],
+    },
+    {
+      name: "Pro",
+      price: "$99 / month",
+      planId: "pro",
+      highlight: true,
+      features: [
+        "Everything in Starter",
+        "Predictive Analytics",
+        "Revenue Forecasting",
+        "AI Workflows",
+        "Priority Support",
+      ],
+    },
+    {
+      name: "Enterprise",
+      price: "Custom",
+      planId: "enterprise",
+      features: [
+        "Autonomous Brain",
+        "Incident Command Center",
+        "Role-Based Dashboards",
+        "Dedicated SLA",
+      ],
+    },
+  ];
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+  return (
+    <div className="min-h-screen bg-[#020617] text-white px-6 py-16">
+      <h1 className="text-4xl font-bold text-center mb-4">
+        Choose Your Plan
+      </h1>
+      <p className="text-slate-400 text-center mb-12">
+        Scale your support with AI-powered automation
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {plans.map((plan) => (
           <div
             key={plan.name}
-            className={`rounded-2xl p-6 border ${
+            className={`rounded-2xl p-8 border ${
               plan.highlight
                 ? "border-blue-500 bg-blue-500/10"
                 : "border-white/10 bg-white/5"
-            } backdrop-blur-xl`}
+            }`}
           >
-            <h2 className="text-xl font-semibold text-white">
+            <h2 className="text-2xl font-semibold mb-2">
               {plan.name}
             </h2>
+            <p className="text-3xl font-bold mb-6">{plan.price}</p>
 
-            <p className="text-3xl font-bold text-white mt-4">
-              {plan.price}
-              <span className="text-sm text-slate-400">
-                {plan.interval && ` / ${plan.interval}`}
-              </span>
-            </p>
-
-            <ul className="mt-6 space-y-3">
+            <ul className="space-y-3 text-slate-300 mb-6">
               {plan.features.map((f) => (
-                <li
-                  key={f}
-                  className="text-slate-300 text-sm"
-                >
-                  ✓ {f}
-                </li>
+                <li key={f}>✓ {f}</li>
               ))}
             </ul>
 
             <button
-              onClick={() => subscribe(plan.priceId)}
-              className={`mt-8 w-full py-3 rounded-lg font-semibold transition ${
-                plan.highlight
-                  ? "bg-blue-600 hover:bg-blue-700 text-white"
-                  : "bg-white/10 hover:bg-white/20 text-white"
-              }`}
+              onClick={() => subscribe(plan.planId)}
+              className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 font-semibold"
             >
               Get Started
             </button>
           </div>
         ))}
-      </section>
-    </main>
+      </div>
+    </div>
   );
 }

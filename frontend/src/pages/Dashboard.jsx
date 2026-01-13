@@ -1,134 +1,148 @@
+import RevenueChart from "../components/RevenueChart";
+import AIImpact from "../components/AIImpact";
+
 import {
-  Activity,
-  Cpu,
-  Inbox,
-  TrendingUp,
-  ShieldCheck,
+  Sparkles,
+  Ticket,
+  DollarSign,
+  Users,
 } from "lucide-react";
 
-const stats = [
-  {
-    label: "Open Tickets",
-    value: "12",
-    icon: Inbox,
-    accent: "text-blue-500",
-  },
-  {
-    label: "AI Auto-Resolved",
-    value: "842",
-    icon: Cpu,
-    accent: "text-emerald-500",
-  },
-  {
-    label: "System Health",
-    value: "99.9%",
-    icon: ShieldCheck,
-    accent: "text-indigo-400",
-  },
-  {
-    label: "Active Workflows",
-    value: "6",
-    icon: Activity,
-    accent: "text-orange-400",
-  },
-];
+/**
+ * Demo SaaS metrics
+ */
+const demoMetrics = {
+  mrr: 2480,
+  mrrChange: "+12.4%",
+  customers: 31,
+  customersChange: "+3",
+  tickets: 1284,
+  ticketsChange: "+18%",
+  aiResolutionRate: 67,
+};
 
 export default function Dashboard() {
+  const stats = [
+    {
+      label: "Monthly Recurring Revenue",
+      value: `$${demoMetrics.mrr.toLocaleString()}`,
+      change: demoMetrics.mrrChange,
+      icon: DollarSign,
+      color: "text-emerald-400",
+    },
+    {
+      label: "Active Customers",
+      value: demoMetrics.customers,
+      change: demoMetrics.customersChange,
+      icon: Users,
+      color: "text-blue-400",
+    },
+    {
+      label: "Tickets (30 days)",
+      value: demoMetrics.tickets,
+      change: demoMetrics.ticketsChange,
+      icon: Ticket,
+      color: "text-purple-400",
+    },
+    {
+      label: "AI Resolution Rate",
+      value: `${demoMetrics.aiResolutionRate}%`,
+      change: "+5%",
+      icon: Sparkles,
+      color: "text-green-400",
+    },
+  ];
+
   return (
-    <main className="p-6 lg:p-10 space-y-10">
+    <div className="min-h-screen bg-[#020617] text-slate-100 px-6 py-8">
       {/* Header */}
-      <section className="flex flex-col gap-2">
+      <div className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight">
           SupportOps Dashboard
         </h1>
-        <p className="text-slate-400 max-w-2xl">
-          Live AI-powered support operations overview. Monitor tickets,
-          automation performance, and system health in real time.
+        <p className="text-slate-400 mt-1">
+          AI-powered support operations overview
         </p>
-      </section>
+      </div>
 
       {/* KPI Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="relative overflow-hidden rounded-2xl bg-panel border border-white/10 p-6 shadow-glass"
+            className="rounded-2xl bg-white/5 border border-white/10 p-6 backdrop-blur-xl"
           >
-            <div className="flex items-center justify-between">
-              <stat.icon
-                className={`h-8 w-8 ${stat.accent}`}
-              />
-              <TrendingUp className="h-5 w-5 text-slate-500" />
+            <div className="flex items-center justify-between mb-4">
+              <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              <span className="text-xs text-emerald-400">
+                {stat.change}
+              </span>
             </div>
 
-            <div className="mt-6">
-              <p className="text-sm text-slate-400">
-                {stat.label}
-              </p>
-              <p className="text-3xl font-semibold mt-1">
-                {stat.value}
-              </p>
+            <div className="text-3xl font-bold mb-1">
+              {stat.value}
             </div>
-
-            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="text-sm text-slate-400">
+              {stat.label}
+            </div>
           </div>
         ))}
-      </section>
+      </div>
 
-      {/* Main Grid */}
-      <section className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Activity Feed */}
-        <div className="xl:col-span-2 rounded-2xl bg-panel border border-white/10 p-6 shadow-glass">
+      {/* Operations */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-12">
+        {/* Live Activity */}
+        <div className="xl:col-span-2 rounded-2xl bg-white/5 border border-white/10 p-6">
           <h2 className="text-lg font-semibold mb-4">
             Live AI Activity
           </h2>
 
-          <ul className="space-y-4">
-            {[
-              "AI resolved ticket #3921 in 1.2s",
-              "New ticket received from Stripe webhook",
-              "Workflow escalation triggered for VIP client",
-              "Revenue forecast model refreshed",
-            ].map((item, idx) => (
-              <li
-                key={idx}
-                className="flex items-center gap-3 text-sm text-slate-300"
-              >
-                <span className="h-2 w-2 rounded-full bg-blue-500" />
-                {item}
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-4 text-sm text-slate-300">
+            <div className="flex justify-between">
+              <span>Ticket #4921 auto-resolved</span>
+              <span className="text-emerald-400">AI</span>
+            </div>
+            <div className="flex justify-between">
+              <span>New customer onboarded: Acme Ltd</span>
+              <span className="text-blue-400">Growth</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Workflow optimized: Billing Issues</span>
+              <span className="text-purple-400">System</span>
+            </div>
+          </div>
         </div>
 
         {/* System Status */}
-        <div className="rounded-2xl bg-panel border border-white/10 p-6 shadow-glass">
+        <div className="rounded-2xl bg-white/5 border border-white/10 p-6">
           <h2 className="text-lg font-semibold mb-4">
             System Status
           </h2>
 
-          <div className="space-y-4">
-            {[
-              { name: "AI Brain", status: "Operational" },
-              { name: "WebSockets", status: "Stable" },
-              { name: "Billing Engine", status: "Operational" },
-              { name: "Data Pipelines", status: "Healthy" },
-            ].map((service) => (
-              <div
-                key={service.name}
-                className="flex items-center justify-between text-sm"
-              >
-                <span className="text-slate-300">
-                  {service.name}
-                </span>
-                <span className="text-emerald-400 font-medium">
-                  {service.status}
-                </span>
-              </div>
-            ))}
+          <div className="space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span>AI Engine</span>
+              <span className="text-green-400">Operational</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Workflow Engine</span>
+              <span className="text-green-400">Stable</span>
+            </div>
+            <div className="flex justify-between">
+              <span>API Latency</span>
+              <span className="text-slate-300">118ms</span>
+            </div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+
+      {/* ✅ ANALYTICS SECTION (THIS WAS MISSING) */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <RevenueChart />
+        </div>
+        <AIImpact />
+      </div>
+    </div>
   );
 }

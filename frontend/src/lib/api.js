@@ -1,29 +1,54 @@
 import axios from "axios";
 
+/**
+ * Base API instance
+ * VITE_API_URL must be:
+ * https://supportops-ai.onrender.com/api/v1
+ */
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,   // e.g. "https://supportops-ai.onrender.com/api/v1"
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// ✅ Attach JWT token automatically to every request
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("access_token");
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+/**
+ * Attach JWT token automatically
+ */
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("access_token");
 
-// ✅ Handle 401 errors globally
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    if (err?.response?.status === 401) {
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user");   // clear stored user too
-      window.location.href = "/login";   // redirect to login
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return Promise.reject(err);
+
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+/**
+ * Global error handling
+ */
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+
+    // Unauthorized → force logout
+    if (status === 401) {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user");
+
+      // Avoid infinite redirect loop
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
+    return Promise.reject(error);
   }
 );
 

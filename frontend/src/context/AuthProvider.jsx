@@ -19,15 +19,19 @@ export function AuthProvider({ children }) {
   }, []);
 
   async function login(credentials) {
-    const res = await api.post("/auth/login", credentials);
+    try {
+      const res = await api.post("/auth/login", credentials); // ✅ backend route is /api/v1/auth/login
+      const { access_token, user } = res.data;
 
-    const { access_token, user } = res.data;
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("user", JSON.stringify(user));
+      setUser(user);
 
-    localStorage.setItem("access_token", access_token);
-    localStorage.setItem("user", JSON.stringify(user));
-
-    setUser(user);
-    return user;
+      return user;
+    } catch (err) {
+      console.error("Login failed:", err);
+      throw err;
+    }
   }
 
   function logout() {

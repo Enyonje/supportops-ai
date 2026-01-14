@@ -1,16 +1,18 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes import tickets, users, auth
 from app.database import create_db_and_tables
+from app.api.router import api_router   # ✅ central router aggregator
 
-from app.api import revenue_forecast, investor_metrics, autonomous_brain
-from app.routes import billing
-from app.routes import webhooks
+app = FastAPI(
+    title="SupportOps AI",
+    version="0.1.0",
+    openapi_url="/openapi.json",
+)
 
-
-
-app = FastAPI(title="SupportOps AI")
+@app.get("/")
+def root():
+    return {"status": "ok"}
 
 # ✅ Explicitly list allowed origins
 origins = [
@@ -30,13 +32,5 @@ app.add_middleware(
 async def on_startup():
     await create_db_and_tables()
 
-# Routers
-app.include_router(auth.router, prefix="/api/v1")
-app.include_router(users.router, prefix="/api/v1")
-app.include_router(tickets.router, prefix="/api/v1")
-app.include_router(autonomous_brain.router, prefix="/api/v1")
-app.include_router(investor_metrics.router, prefix="/api/v1")
-app.include_router(revenue_forecast.router, prefix="/api/v1")
-app.include_router(billing.router, prefix="/api/v1")
+# ✅ Include all routers via api_router
 app.include_router(api_router, prefix="/api/v1")
-app.include_router(webhooks.router)

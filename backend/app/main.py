@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import create_db_and_tables
-from app.api.router import api_router   # ✅ central router aggregator
+from app.api.router import api_router  # ✅ central router aggregator
 
 app = FastAPI(
     title="SupportOps AI",
@@ -16,21 +16,22 @@ def root():
 
 # ✅ Explicitly list allowed origins
 origins = [
-    "http://localhost:5173",              # local dev
-    "https://supportops-ai.vercel.app",   # deployed frontend
+    "http://localhost:5173",               # local dev
+    "https://supportops-ai.vercel.app",    # deployed frontend
 ]
 
+# ✅ CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,                 # or use ["*"] for testing
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # more explicit
+    allow_headers=["Authorization", "Content-Type", "Set-Cookie"],  # include auth headers
 )
 
 @app.on_event("startup")
 async def on_startup():
     await create_db_and_tables()
 
-# ✅ Include all routers via api_router
+# ✅ Mount all API routes under /api/v1
 app.include_router(api_router, prefix="/api/v1")

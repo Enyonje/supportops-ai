@@ -23,10 +23,10 @@ origins = [
 # ✅ CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,                 # or use ["*"] for testing
+    allow_origins=origins,     # restrict to your frontend domains
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # more explicit
-    allow_headers=["Authorization", "Content-Type", "Set-Cookie"],  # include auth headers
+    allow_methods=["*"],       # allow all HTTP methods including OPTIONS
+    allow_headers=["*"],       # allow all headers (important for preflight requests)
 )
 
 @app.on_event("startup")

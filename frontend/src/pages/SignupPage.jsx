@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/auth.jsx";
+import { useAuth } from "../context/AuthContext";
 
 export default function SignupPage() {
-  const { signup } = useAuth(); // ✅ provided by context
+  const { register } = useAuth(); // ✅ now provided by context
   const navigate = useNavigate();
 
   const [email, setEmail] = useState("");
@@ -18,11 +18,11 @@ export default function SignupPage() {
     setError(null);
 
     try {
-      // Call signup from context (auth.jsx handles backend + login)
-      const user = await signup({ email, password, name });
+      const user = await register({ email, password, name });
 
-      // Route user by role after signup
-      switch (user.role) {
+      // Route user by role
+      const role = user?.role || "agent";
+      switch (role) {
         case "agent":
           navigate("/agent/dashboard");
           break;
@@ -37,8 +37,8 @@ export default function SignupPage() {
           navigate("/agent/dashboard");
       }
     } catch (err) {
-      console.error(err);
-      setError(err.message || "Signup failed. Please try again.");
+      console.error("Signup error:", err);
+      setError(err?.response?.data?.detail || err.message || "Signup failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,6 @@ export default function SignupPage() {
       >
         <h1 className="text-2xl font-bold text-white text-center">Create Account</h1>
 
-        {/* Name / Email / Password */}
         <div className="space-y-4">
           <input
             type="text"
@@ -82,7 +81,6 @@ export default function SignupPage() {
 
         {error && <p className="text-red-400 text-sm text-center">{error}</p>}
 
-        {/* Signup button */}
         <button
           type="submit"
           disabled={loading}

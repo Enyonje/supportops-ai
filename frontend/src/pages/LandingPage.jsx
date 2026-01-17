@@ -18,7 +18,8 @@ export default function LandingPage() {
         </p>
 
         <div className="mt-10 flex items-center justify-center gap-4">
-          <NavLink to="/login">
+          {/* ✅ Route to signup instead of login */}
+          <NavLink to="/signup">
             <CTAButton className="px-6 py-3 text-lg">Get Started</CTAButton>
           </NavLink>
           <NavLink
@@ -86,7 +87,8 @@ export default function LandingPage() {
           you apart.
         </p>
         <div className="mt-8">
-          <NavLink to="/login">
+          {/* ✅ Route to signup instead of login */}
+          <NavLink to="/signup">
             <CTAButton className="px-6 py-3 text-lg">Start Free</CTAButton>
           </NavLink>
         </div>

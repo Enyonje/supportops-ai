@@ -9,8 +9,9 @@ from app.core.security import verify_password, hash_password
 from app.core.jwt import create_access_token
 
 # ✅ Only "auth" here, let main.py add /api/v1
-router = APIRouter(prefix="/auth", tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
+# ----- Request / Response Models -----
 class RegisterRequest(BaseModel):
     email: str
     password: str
@@ -23,41 +24,48 @@ class AuthResponse(BaseModel):
     email: str
     name: str
 
+# ----- Login -----
 @router.post("/login", response_model=AuthResponse)
-def login(form: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
+def login(
+    form: OAuth2PasswordRequestForm = Depends(),
+    session: Session = Depends(get_session),
+):
     user = session.exec(select(User).where(User.email == form.username)).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": str(user.id), "role": user.role})
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "role": user.role,
-        "email": user.email,
-        "name": user.name,
-    }
+    return AuthResponse(
+        access_token=token,
+        role=user.role,
+        email=user.email,
+        name=user.name,
+    )
 
+# ----- Register -----
 @router.post("/register", response_model=AuthResponse)
 def register(payload: RegisterRequest, session: Session = Depends(get_session)):
-    if session.exec(select(User).where(User.email == payload.email)).first():
+    # Check if email already exists
+    existing = session.exec(select(User).where(User.email == payload.email)).first()
+    if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
 
+    # Create new user
     user = User(
         email=payload.email,
         name=payload.name,
         hashed_password=hash_password(payload.password),
-        role="agent"
+        role="agent",  # default role
     )
     session.add(user)
     session.commit()
     session.refresh(user)
 
+    # Issue JWT
     token = create_access_token({"sub": str(user.id), "role": user.role})
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "role": user.role,
-        "email": user.email,
-        "name": user.name,
-    }
+    return AuthResponse(
+        access_token=token,
+        role=user.role,
+        email=user.email,
+        name=user.name,
+    )

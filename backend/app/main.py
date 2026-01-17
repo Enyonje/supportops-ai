@@ -10,27 +10,28 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
-# ✅ MUST be defined BEFORE routes
+@app.get("/")
+def root():
+    return {"status": "ok"}
+
+# ✅ Allow frontend origins
 origins = [
-    "http://localhost:5173",
-    "https://supportops-ai.vercel.app",
+    "http://localhost:5173",               # local dev
+    "https://supportops-ai.vercel.app",    # deployed frontend
 ]
 
+# ✅ CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # ❗ explicit, not "*"
+    allow_origins=origins,     # restrict to your frontend domains
     allow_credentials=True,
-    allow_methods=["*"],          # allows OPTIONS
-    allow_headers=["*"],
+    allow_methods=["*"],       # allow all HTTP methods including OPTIONS
+    allow_headers=["*"],       # allow all headers (important for preflight requests)
 )
 
 @app.on_event("startup")
 async def on_startup():
     await create_db_and_tables()
 
-@app.get("/")
-def root():
-    return {"status": "ok"}
-
-# ✅ routers come AFTER middleware
+# ✅ Mount all API routes under /api/v1
 app.include_router(api_router, prefix="/api/v1")

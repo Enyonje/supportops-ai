@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function SignupPage() {
@@ -38,7 +38,11 @@ export default function SignupPage() {
       }
     } catch (err) {
       console.error("Signup error:", err);
-      setError(err?.response?.data?.detail || err.message || "Signup failed. Please try again.");
+      setError(
+        err?.response?.data?.detail ||
+          err.message ||
+          "Signup failed. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -88,6 +92,14 @@ export default function SignupPage() {
         >
           {loading ? "Signing up..." : "Sign Up"}
         </button>
+
+        {/* ✅ Login link for existing users */}
+        <p className="text-center text-sm text-white/70">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-400 hover:underline font-medium">
+            Login
+          </Link>
+        </p>
       </form>
     </div>
   );

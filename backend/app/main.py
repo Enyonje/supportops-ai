@@ -9,13 +9,14 @@ app = FastAPI(
     version="0.1.0",
 )
 
-# 🔥 MUST be before routers
+origins = [
+    "https://supportops-ai.vercel.app",
+    "http://localhost:5173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://supportops-ai.vercel.app",
-        "http://localhost:5173",
-    ],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

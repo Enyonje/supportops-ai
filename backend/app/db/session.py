@@ -1,13 +1,12 @@
-from sqlmodel import Session, create_engine
+from sqlmodel import SQLModel, create_engine, Session
 from app.core.config import settings
 
-# Create database engine
 engine = create_engine(
     settings.DATABASE_URL,
-    echo=settings.DEBUG,
+    echo=False,
+    pool_pre_ping=True
 )
 
-# Dependency used by FastAPI routes
 def get_session():
     with Session(engine) as session:
         yield session

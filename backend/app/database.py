@@ -1,6 +1,12 @@
 import os
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlmodel import SQLModel
+from app.db.session import engine
+
+async def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
 
 # 1. Base class for your models
 Base = declarative_base()
@@ -21,7 +27,7 @@ async_session = sessionmaker(
 # 5. Function to create all tables at startup
 async def create_db_and_tables():
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(SQLModel.metadata.create_all)
 
 # 6. Dependency for FastAPI routes
 async def get_session() -> AsyncSession:

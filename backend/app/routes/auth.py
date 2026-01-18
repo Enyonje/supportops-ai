@@ -8,10 +8,9 @@ from app.models.user import User
 from app.core.security import verify_password, hash_password
 from app.core.jwt import create_access_token
 
-# ✅ Only "auth" here, let main.py add /api/v1
-router = APIRouter(prefix="/auth", tags=["auth"])
+# ✅ No prefix here
+router = APIRouter(tags=["auth"])
 
-# ----- Request / Response Models -----
 class RegisterRequest(BaseModel):
     email: str
     password: str
@@ -24,12 +23,8 @@ class AuthResponse(BaseModel):
     email: str
     name: str
 
-# ----- Login -----
 @router.post("/login", response_model=AuthResponse)
-def login(
-    form: OAuth2PasswordRequestForm = Depends(),
-    session: Session = Depends(get_session),
-):
+def login(form: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     user = session.exec(select(User).where(User.email == form.username)).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -42,26 +37,21 @@ def login(
         name=user.name,
     )
 
-# ----- Register -----
 @router.post("/register", response_model=AuthResponse)
 def register(payload: RegisterRequest, session: Session = Depends(get_session)):
-    # Check if email already exists
-    existing = session.exec(select(User).where(User.email == payload.email)).first()
-    if existing:
+    if session.exec(select(User).where(User.email == payload.email)).first():
         raise HTTPException(status_code=400, detail="Email already exists")
 
-    # Create new user
     user = User(
         email=payload.email,
         name=payload.name,
         hashed_password=hash_password(payload.password),
-        role="agent",  # default role
+        role="agent"
     )
     session.add(user)
     session.commit()
     session.refresh(user)
 
-    # Issue JWT
     token = create_access_token({"sub": str(user.id), "role": user.role})
     return AuthResponse(
         access_token=token,

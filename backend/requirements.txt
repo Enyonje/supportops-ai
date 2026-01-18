@@ -26,6 +26,7 @@ types-protobuf==6.32.1.20251210
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 uvicorn==0.40.0
+gunicorn
 websockets==15.0.1
 stripe
 python-jose[cryptography]

@@ -1,0 +1,7 @@
+FastAPI
+SQLAlchemy
+sqlmodel
+uvicorn
+python-dotenv
+passlib[bcrypt]
+httpx

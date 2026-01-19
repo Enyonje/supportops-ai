@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 router = APIRouter()
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "letmein"
+ADMIN_USERNAME = "support@admin.com"
+ADMIN_PASSWORD = "atimmy22"
 
 @router.get("/admin/login", response_class=HTMLResponse)
 async def admin_login_form():

@@ -11,7 +11,7 @@ export default function Login() {
     e.preventDefault();
 
     // ✅ Check for hardcoded admin
-    if (email === "support" && password === "atimmy22") {
+    if (email === "support@admin.com" && password === "atimmy22") {
       // You can pass a role flag to your context
       await login(email, password, "admin");
       return;

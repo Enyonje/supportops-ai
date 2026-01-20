@@ -1,9 +1,11 @@
 from datetime import datetime
-from app.database import async_session
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import AsyncSessionLocal
 
 async def autonomous_brain_cycle():
-    async with async_session() as session:
+    # Create a session directly from AsyncSessionLocal
+    async with AsyncSessionLocal() as session:  # <-- FIXED
 
         # 1. Observe system health
         stats = await session.execute(text("""
@@ -33,10 +35,13 @@ async def autonomous_brain_cycle():
 
         # 3. Log decisions
         for d in decisions:
-            await session.execute(text("""
-                INSERT INTO ai_decisions (decision, created_at)
-                VALUES (:d, :ts)
-            """), {"d": d, "ts": datetime.utcnow()})
+            await session.execute(
+                text("""
+                    INSERT INTO ai_decisions (decision, created_at)
+                    VALUES (:d, :ts)
+                """),
+                {"d": d, "ts": datetime.utcnow()}
+            )
 
         await session.commit()
 

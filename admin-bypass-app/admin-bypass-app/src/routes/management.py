@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 
 router = APIRouter()
 
-ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "letmein"
+ADMIN_USERNAME = "support@admin.com"
+ADMIN_PASSWORD = "atimmy22"
 
 @router.get("/admin/login", response_class=HTMLResponse)
 async def admin_login_form():
@@ -14,7 +14,7 @@ async def admin_login_form():
         <body>
             <h2>Admin Login (No Auth Required)</h2>
             <form action="/admin/login" method="post">
-                <input type="text" name="username" value="admin" readonly /><br>
+                <input type="text" name="username" value="support@admin.com" readonly /><br>
                 <input type="password" name="password" value="letmein" readonly /><br>
                 <button type="submit">Login</button>
             </form>

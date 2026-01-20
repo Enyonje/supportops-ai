@@ -5,6 +5,7 @@ SQLAlchemy
 sqlmodel
 asyncpg
 pydantic
+psycopg2-binary
 pydantic_core
 pydantic-settings
 python-jose[cryptography]

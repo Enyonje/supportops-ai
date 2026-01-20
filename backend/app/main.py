@@ -1,3 +1,4 @@
+# app/main.py
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,12 +9,13 @@ from app.api.router import api_router
 # Lifespan handler replaces @app.on_event
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup logic
+    # ✅ Startup logic
     await create_db_and_tables()
     yield
-    # Shutdown logic (optional)
-    # e.g., close connections, cleanup tasks
+    # ✅ Shutdown logic (optional)
+    # Example: close connections, cleanup tasks
 
+# Initialize FastAPI app
 app = FastAPI(
     title="SupportOps AI",
     version="0.1.0",
@@ -26,6 +28,7 @@ origins = [
     "http://localhost:5173",
 ]
 
+# ✅ Middleware setup
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -34,8 +37,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ✅ Simple health check route
-@app.get("/health")
+# ✅ Health check route
+@app.get("/health", tags=["system"])
 async def health():
     return {"status": "ok"}
 

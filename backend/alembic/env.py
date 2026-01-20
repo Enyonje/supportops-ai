@@ -3,6 +3,8 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
+
+
 # Import your SQLModel metadata
 from sqlmodel import SQLModel
 from app.models import user  # import your models package so Alembic sees them

@@ -11,15 +11,16 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-engine = None
-AsyncSessionLocal = None
-
 # Configure logging
 logger = logging.getLogger("uvicorn")
 
-def setup_engine():
+# Global engine and session factory
+engine: create_async_engine | None = None
+async_session: sessionmaker | None = None  # ✅ exported name for imports
+
+def setup_engine() -> None:
     """Initialize the async engine and session factory lazily."""
-    global engine, AsyncSessionLocal
+    global engine, async_session
 
     if not DATABASE_URL:
         raise RuntimeError("❌ DATABASE_URL is not set. Check your .env or environment variables.")
@@ -30,13 +31,13 @@ def setup_engine():
         future=True,
     )
 
-    AsyncSessionLocal = sessionmaker(
+    async_session = sessionmaker(
         bind=engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
 
-async def init_db():
+async def init_db() -> None:
     """Create tables at startup and log DB connectivity."""
     if engine is None:
         setup_engine()
@@ -55,7 +56,7 @@ async def init_db():
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
-async def shutdown_db():
+async def shutdown_db() -> None:
     """Dispose of the engine gracefully at shutdown."""
     if engine is not None:
         logger.info("🔻 Closing Supabase DB connections...")
@@ -64,7 +65,7 @@ async def shutdown_db():
 
 async def get_session() -> AsyncSession:
     """Dependency for FastAPI routes."""
-    if AsyncSessionLocal is None:
+    if async_session is None:
         setup_engine()
-    async with AsyncSessionLocal() as session:
+    async with async_session() as session:
         yield session

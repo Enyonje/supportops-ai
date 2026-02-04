@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import init_db, shutdown_db, get_session
 from app.api.router import api_router
@@ -20,4 +21,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# ... rest of your middleware, routes, and /db-check
+# ✅ CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # adjust for production (e.g., specific domains)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# ✅ Include your API router
+app.include_router(api_router)
+
+# ✅ Health check endpoint
+@app.get("/db-check")
+async def db_check(session: AsyncSession = Depends(get_session)):
+    result = await session.execute(text("SELECT 1"))
+    return {"status": "ok" if result.scalar() == 1 else "error"}

@@ -1,3 +1,10 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
+
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
@@ -11,6 +18,12 @@ from app.models import user  # import your models package so Alembic sees them
 
 # Alembic Config object, provides access to values in alembic.ini
 config = context.config
+
+database_url = os.getenv("SYNC_DATABASE_URL")
+
+if database_url:
+    config.set_main_option("sqlalchemy.url", database_url)
+
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

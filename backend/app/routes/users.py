@@ -1,44 +1,35 @@
-from fastapi import APIRouter, Depends
-from sqlmodel import Session, select
-from typing import List
+from sqlmodel import SQLModel, Field
+from datetime import datetime
 
-from app.database import get_session
-from app.models.user import User
-from app.core.security import hash_password, require_admin   # ✅ import require_admin here
-from app.core.deps import require_role
+class User(SQLModel, table=True):
+    __tablename__ = "users"   # explicitly match the DB table name
 
-router = APIRouter(prefix="/api/v1/users", tags=["Users"])
+    id: int | None = Field(default=None, primary_key=True)
 
-# Demo route (optional, remove if not needed)
-@router.get("/demo")
-def demo_users(admin: User = Depends(require_admin)):
-    return [
-        {"email": "agent@demo.com", "plan": "pro"},
-        {"email": "admin@demo.com", "plan": "business"},
-    ]
-
-# Actual route returning users from DB
-@router.get("/", response_model=List[User])
-def list_users(
-    session: Session = Depends(get_session),
-    _: User = Depends(require_role("admin"))
-):
-    return session.exec(select(User)).all()
-
-@router.post("/", response_model=User)
-def create_user(
-    email: str,
-    password: str,
-    role: str = "agent",
-    session: Session = Depends(get_session),
-    _: User = Depends(require_role("admin"))
-):
-    user = User(
-        email=email,
-        hashed_password=hash_password(password),
-        role=role
+    # Use sa_column_kwargs for unique + nullable constraints
+    email: str = Field(
+        index=True,
+        sa_column_kwargs={"unique": True, "nullable": False}
     )
-    session.add(user)
-    session.commit()
-    session.refresh(user)
-    return user
+
+    hashed_password: str = Field(
+        sa_column_kwargs={"nullable": False}
+    )
+
+    role: str = Field(
+        sa_column_kwargs={"nullable": False}
+    )
+
+    plan: str = Field(
+        sa_column_kwargs={"nullable": False}
+    )
+
+    is_active: bool = Field(
+        default=True,
+        sa_column_kwargs={"nullable": False}
+    )
+
+    created_at: datetime = Field(
+        default_factory=datetime.utcnow,
+        sa_column_kwargs={"nullable": False}
+    )

@@ -34,11 +34,12 @@ app = FastAPI(
 )
 
 # ✅ CORS setup
-allowed_origins = []
-if settings.FRONTEND_URL:
-    allowed_origins.append(settings.FRONTEND_URL)
-# optionally add localhost for dev
-allowed_origins.append("http://localhost:3000")
+allowed_origins = [
+    "https://supportops-ai.vercel.app",
+    "https://supportops-ai.vercel.app/",
+    "http://localhost:3000",
+]
+
 
 app.add_middleware(
     CORSMiddleware,

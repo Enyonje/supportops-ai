@@ -49,7 +49,7 @@ app.add_middleware(
 )
 
 # ✅ Routers
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/db-check")
 async def db_check(session: AsyncSession = Depends(get_session)):

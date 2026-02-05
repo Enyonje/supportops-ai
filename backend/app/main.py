@@ -9,7 +9,8 @@ from app.database import init_db, shutdown_db, get_session
 from app.api.router import api_router
 from app.core.config import settings
 
-logger = logging.getLogger("uvicorn")
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -32,14 +33,22 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+# ✅ CORS setup
+allowed_origins = []
+if settings.FRONTEND_URL:
+    allowed_origins.append(settings.FRONTEND_URL)
+# optionally add localhost for dev
+allowed_origins.append("http://localhost:3000")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# ✅ Routers
 app.include_router(api_router)
 
 @app.get("/db-check")
@@ -47,15 +56,19 @@ async def db_check(session: AsyncSession = Depends(get_session)):
     result = await session.execute(text("SELECT 1"))
     return {"status": "ok" if result.scalar() == 1 else "error"}
 
-# ✅ New safe environment check endpoint
 @app.get("/env-check")
 def env_check():
     db_url = settings.DATABASE_URL
-    db_backend = "SQLite" if db_url.startswith("sqlite") else "Supabase/Postgres" if "supabase.co" in db_url else "Custom"
+    if db_url.startswith("sqlite"):
+        db_backend = "SQLite"
+    elif "supabase.co" in db_url:
+        db_backend = "Supabase/Postgres"
+    else:
+        db_backend = "Custom"
 
     return {
         "project_name": settings.PROJECT_NAME,
         "frontend_url": settings.FRONTEND_URL,
-        "debug_mode": settings.DEBUG,
+        "debug_mode": bool(settings.DEBUG),
         "database_backend": db_backend,
     }

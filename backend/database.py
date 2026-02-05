@@ -3,32 +3,34 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from sqlmodel import SQLModel
+from app.core.config import settings
 
-from app.core.config import settings  # ✅ use your Pydantic settings
+# Configure structured logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("supportops.db")
 
-# Globals
-engine: create_async_engine | None = None
-async_session: sessionmaker | None = None
-
-# Configure logging
-logger = logging.getLogger("uvicorn")
+engine = None
+async_session = None
 
 
-def setup_engine() -> None:
+def setup_engine():
     """Initialize the async engine and session factory lazily."""
     global engine, async_session
 
     if not settings.DATABASE_URL:
-        raise RuntimeError("❌ DATABASE_URL is not set. Check your .env or environment variables.")
+        raise RuntimeError("❌ DATABASE_URL is not set")
 
-    # ✅ Must be asyncpg driver
-    if not settings.DATABASE_URL.startswith("postgresql+asyncpg"):
-        raise RuntimeError("❌ DATABASE_URL must use asyncpg driver for async engine")
+    logger.info(f"🔧 Creating async engine with URL driver: {settings.DATABASE_URL.split(':')[0]}")
 
+    # ✅ Disable statement cache for PgBouncer compatibility
     engine = create_async_engine(
         settings.DATABASE_URL,
-        echo=True,
+        echo=False,
         future=True,
+        connect_args={"statement_cache_size": 0},
     )
 
     async_session = sessionmaker(
@@ -37,8 +39,10 @@ def setup_engine() -> None:
         expire_on_commit=False,
     )
 
+    logger.info("✅ Async engine and session factory initialized")
 
-async def init_db() -> None:
+
+async def init_db():
     """Create tables at startup and log DB connectivity."""
     if engine is None:
         setup_engine()
@@ -47,26 +51,29 @@ async def init_db() -> None:
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT 1"))
             if result.scalar() == 1:
-                logger.info("✅ Connected to database successfully")
+                logger.info("🟢 Database connectivity check passed")
     except Exception as e:
-        logger.error(f"❌ Failed to connect to database: {e}")
+        logger.error(f"❌ Database connectivity failed: {e}")
         raise
 
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
+        logger.info("📦 Tables ensured via SQLModel metadata")
 
 
-async def shutdown_db() -> None:
+async def shutdown_db():
     """Dispose of the engine gracefully at shutdown."""
     if engine is not None:
-        logger.info("🔻 Closing DB connections...")
+        logger.info("🔻 Disposing DB engine...")
         await engine.dispose()
-        logger.info("✅ DB connections closed")
+        logger.info("✅ DB engine disposed")
 
 
 async def get_session() -> AsyncSession:
     """Dependency for FastAPI routes."""
     if async_session is None:
         setup_engine()
+    logger.debug("📥 Opening new DB session")
     async with async_session() as session:
         yield session
+    logger.debug("📤 DB session closed")

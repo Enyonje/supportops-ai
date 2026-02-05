@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "SupportOps API"
     DEBUG: bool = False
 
-    # Load from .env
+    # ✅ Load from .env automatically
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

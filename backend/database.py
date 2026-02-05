@@ -25,7 +25,7 @@ def setup_engine():
         raise RuntimeError("❌ DATABASE_URL is not set. Check your .env or environment variables.")
 
     engine = create_async_engine(
-        DATABASE_URL,
+        settings.DATABASE_URL,
         echo=True,
         future=True,
     )

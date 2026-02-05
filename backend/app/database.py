@@ -1,7 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from sqlmodel import SQLModel
@@ -15,8 +15,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 logger = logging.getLogger("uvicorn")
 
 # Global engine and session factory
-engine: create_async_engine | None = None
-async_session: sessionmaker | None = None  # ✅ exported name for imports
+engine: AsyncEngine | None = None
+async_session: sessionmaker | None = None  # exported name for imports
 
 def setup_engine() -> None:
     """Initialize the async engine and session factory lazily."""
@@ -42,7 +42,6 @@ async def init_db() -> None:
     if engine is None:
         setup_engine()
 
-    # ✅ Test connectivity with a simple query
     try:
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT 1"))
@@ -52,7 +51,6 @@ async def init_db() -> None:
         logger.error(f"❌ Failed to connect to Supabase: {e}")
         raise
 
-    # ✅ Create tables
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

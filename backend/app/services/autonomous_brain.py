@@ -1,11 +1,13 @@
+# app/services/autonomous_brain.py
 from datetime import datetime
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.database import AsyncSessionLocal
+from app.database import async_session
+
 
 async def autonomous_brain_cycle():
-    # Create a session directly from AsyncSessionLocal
-    async with AsyncSessionLocal() as session:  # <-- FIXED
+    # ✅ Use async_session factory from app.database
+    async with async_session() as session:  # session is an AsyncSession
 
         # 1. Observe system health
         stats = await session.execute(text("""
@@ -21,7 +23,7 @@ async def autonomous_brain_cycle():
 
         ai_rate = (ai_resolved / max(total, 1)) * 100
 
-        decisions = []
+        decisions: list[str] = []
 
         # 2. Decide optimizations
         if confidence and confidence < 0.75:
@@ -48,5 +50,5 @@ async def autonomous_brain_cycle():
         return {
             "ai_resolution_rate": round(ai_rate, 2),
             "avg_confidence": round(confidence or 0, 2),
-            "decisions": decisions
+            "decisions": decisions,
         }

@@ -23,15 +23,18 @@ def setup_engine():
     if not settings.DATABASE_URL:
         raise RuntimeError("❌ DATABASE_URL is not set")
 
-    logger.info(f"🔧 Creating async engine with URL driver: {settings.DATABASE_URL.split(':')[0]}")
+    logger.info(f"🔧 Creating async engine with driver: {settings.DATABASE_URL}")
 
-    # ✅ Disable statement cache for PgBouncer compatibility
+    # Disable statement cache + prepared statements for PgBouncer compatibility
     engine = create_async_engine(
         settings.DATABASE_URL,
         echo=False,
         future=True,
         connect_args={"statement_cache_size": 0},
     )
+
+    # ✅ Disable prepared statements at the SQLAlchemy dialect level
+    engine = engine.execution_options(prepared_statement_cache_size=0)
 
     async_session = sessionmaker(
         bind=engine,

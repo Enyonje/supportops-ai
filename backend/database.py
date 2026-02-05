@@ -1,28 +1,29 @@
-import os
 import logging
-from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 from sqlmodel import SQLModel
 
-# Load environment variables
-load_dotenv()
+from app.core.config import settings  # ✅ use your Pydantic settings
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-engine = None
-AsyncSessionLocal = None
+# Globals
+engine: create_async_engine | None = None
+async_session: sessionmaker | None = None
 
 # Configure logging
 logger = logging.getLogger("uvicorn")
 
-def setup_engine():
-    """Initialize the async engine and session factory lazily."""
-    global engine, AsyncSessionLocal
 
-    if not DATABASE_URL:
+def setup_engine() -> None:
+    """Initialize the async engine and session factory lazily."""
+    global engine, async_session
+
+    if not settings.DATABASE_URL:
         raise RuntimeError("❌ DATABASE_URL is not set. Check your .env or environment variables.")
+
+    # ✅ Must be asyncpg driver
+    if not settings.DATABASE_URL.startswith("postgresql+asyncpg"):
+        raise RuntimeError("❌ DATABASE_URL must use asyncpg driver for async engine")
 
     engine = create_async_engine(
         settings.DATABASE_URL,
@@ -30,41 +31,42 @@ def setup_engine():
         future=True,
     )
 
-    AsyncSessionLocal = sessionmaker(
+    async_session = sessionmaker(
         bind=engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
 
-async def init_db():
+
+async def init_db() -> None:
     """Create tables at startup and log DB connectivity."""
     if engine is None:
         setup_engine()
 
-    # ✅ Test connectivity with a simple query
     try:
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT 1"))
             if result.scalar() == 1:
-                logger.info("✅ Connected to Supabase Postgres successfully")
+                logger.info("✅ Connected to database successfully")
     except Exception as e:
-        logger.error(f"❌ Failed to connect to Supabase: {e}")
+        logger.error(f"❌ Failed to connect to database: {e}")
         raise
 
-    # ✅ Create tables
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
-async def shutdown_db():
+
+async def shutdown_db() -> None:
     """Dispose of the engine gracefully at shutdown."""
     if engine is not None:
-        logger.info("🔻 Closing Supabase DB connections...")
+        logger.info("🔻 Closing DB connections...")
         await engine.dispose()
-        logger.info("✅ Supabase DB connections closed")
+        logger.info("✅ DB connections closed")
+
 
 async def get_session() -> AsyncSession:
     """Dependency for FastAPI routes."""
-    if AsyncSessionLocal is None:
+    if async_session is None:
         setup_engine()
-    async with AsyncSessionLocal() as session:
+    async with async_session() as session:
         yield session

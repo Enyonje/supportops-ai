@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
-// ✅ assign env var to a constant
-const API_BASE_URL = import.meta.env.VITE_BACKEND_API_URL;
+const API_BASE_URL =
+  import.meta.env.VITE_BACKEND_API_URL ||
+  "https://supportops-api.onrender.com";
 
 const AuthContext = createContext(null);
 
@@ -10,24 +11,24 @@ export function AuthProvider({ children }) {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Load persisted auth state on mount
+  // Load persisted auth
   useEffect(() => {
     const t = localStorage.getItem("access_token");
     const r = localStorage.getItem("role");
     const u = localStorage.getItem("user");
+
     if (t) setToken(t);
     if (r) setRole(r);
     if (u) setUser(JSON.parse(u));
   }, []);
 
-  // Login: persist token + role + user
+  // Login
   const login = (payload) => {
-    if (typeof payload !== "object") {
-      throw new Error("Invalid login payload");
-    }
+    if (!payload) throw new Error("Invalid login payload");
 
     const accessToken = payload.access_token || payload.token;
     const userRole = payload.role;
+
     const userObj = {
       email: payload.email ?? "unknown@example.com",
       name: payload.name ?? "User",
@@ -45,53 +46,55 @@ export function AuthProvider({ children }) {
     return { access_token: accessToken, role: userRole, user: userObj };
   };
 
-  // Signup: call backend /register, then reuse login
+  // Signup
   const signup = async ({ email, password, name }) => {
-    if (!API_BASE_URL) {
-      throw new Error("Backend API URL is not defined. Check your .env file.");
-    }
+    console.log("API_BASE_URL:", API_BASE_URL);
 
     const res = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({ email, password, name }),
     });
 
     if (!res.ok) {
-      throw new Error("Signup failed");
+      const text = await res.text();
+      throw new Error(text || "Signup failed");
     }
 
     const data = await res.json();
-    // Expecting { access_token, role, email, name }
     return login(data);
   };
 
   const logout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("user");
+    localStorage.clear();
     setToken(null);
     setRole(null);
     setUser(null);
   };
 
-  const value = {
-    token,
-    role,
-    user,
-    login,
-    signup,
-    logout,
-    isAuth: !!token,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        token,
+        role,
+        user,
+        login,
+        signup,
+        logout,
+        isAuth: !!token,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) {
-    throw new Error("useAuth must be used within an AuthProvider");
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return ctx;
 };

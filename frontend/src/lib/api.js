@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  API_BASE_URL: "https://supportops-ai.onrender.com/api/v1",
+  baseURL: "https://supportops-ai.onrender.com/api/v1", // ✅ correct key
   withCredentials: true,
   timeout: 15000,
 });

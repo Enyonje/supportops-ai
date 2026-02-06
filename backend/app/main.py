@@ -35,18 +35,16 @@ app = FastAPI(
 
 # ✅ CORS setup
 allowed_origins = [
-    "https://supportops-ai.vercel.app",
-    "https://supportops-ai.vercel.app/",
-    "http://localhost:3000",
+    "https://supportops-ai.vercel.app",  # production frontend
+    "http://localhost:3000",             # local dev
 ]
-
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # explicit
+    allow_headers=["Authorization", "Content-Type", "Set-Cookie", "*"],
 )
 
 # ✅ Routers

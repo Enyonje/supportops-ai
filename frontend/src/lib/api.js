@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL, // ✅ dynamic
+  baseURL: import.meta.env.VITE_BACKEND_API_URL, // ✅ dynamic
   withCredentials: true,
   timeout: 15000,
 });

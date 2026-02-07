@@ -43,8 +43,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # explicit
-    allow_headers=["Authorization", "Content-Type", "Set-Cookie", "*"],
+    allow_methods=["*"],   # let FastAPI expand automatically
+    allow_headers=["*"],   # wildcard is fine alone
 )
 
 # ✅ Routers

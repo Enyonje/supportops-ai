@@ -35,13 +35,19 @@ app = FastAPI(
 
 # ✅ CORS setup
 allowed_origins = [
-    "https://supportops-ai.vercel.app",  # production frontend
-    "http://localhost:3000",             # local dev
+    "https://supportops-ai.vercel.app",
+    "https://supportops-ai-git-main-nyonjes-projects.vercel.app",
+    "http://localhost:3000",
+    "http://localhost:5173",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=r"https://supportops-ai.*\.vercel\.app",
+    
     allow_credentials=True,
     allow_methods=["*"],   # let FastAPI expand automatically
     allow_headers=["*"],   # wildcard is fine alone

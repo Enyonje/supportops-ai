@@ -1,6 +1,8 @@
+import logging
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from jose import JWTError, jwt
 from pydantic import BaseModel
 
@@ -8,6 +10,8 @@ from app.database import get_session
 from app.models.user import User
 from app.core.security import verify_password, hash_password
 from app.core.jwt import create_access_token
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["auth"])
 
@@ -35,14 +39,18 @@ class AuthResponse(BaseModel):
 # ---------------------------
 # Helpers
 # ---------------------------
-def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
+async def get_current_user(
+    token: str = Depends(oauth2_scheme),
+    session: AsyncSession = Depends(get_session)
+):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: str = payload.get("sub")
-        role: str = payload.get("role")
         if user_id is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        user = session.get(User, int(user_id))
+
+        result = await session.execute(select(User).where(User.id == int(user_id)))
+        user = result.scalar_one_or_none()
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
         return user
@@ -58,9 +66,16 @@ def get_admin_user(current_user: User = Depends(get_current_user)):
 # Auth Endpoints
 # ---------------------------
 @router.post("/login", response_model=AuthResponse)
-def login(form: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
-    user = session.exec(select(User).where(User.email == form.username)).first()
+async def login(
+    form: OAuth2PasswordRequestForm = Depends(),
+    session: AsyncSession = Depends(get_session)
+):
+    logger.info("Login attempt for user=%s", form.username)
+    result = await session.execute(select(User).where(User.email == form.username))
+    user = result.scalar_one_or_none()
+
     if not user or not verify_password(form.password, user.hashed_password):
+        logger.warning("Invalid login for user=%s", form.username)
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     token = create_access_token({"sub": str(user.id), "role": user.role})
@@ -72,8 +87,16 @@ def login(form: OAuth2PasswordRequestForm = Depends(), session: Session = Depend
     )
 
 @router.post("/register", response_model=AuthResponse)
-def register(payload: RegisterRequest, session: Session = Depends(get_session)):
-    if session.exec(select(User).where(User.email == payload.email)).first():
+async def register(
+    payload: RegisterRequest,
+    session: AsyncSession = Depends(get_session)
+):
+    logger.info("Register endpoint hit with email=%s", payload.email)
+
+    result = await session.execute(select(User).where(User.email == payload.email))
+    existing_user = result.scalar_one_or_none()
+    if existing_user:
+        logger.warning("Registration failed: email already exists (%s)", payload.email)
         raise HTTPException(status_code=400, detail="Email already exists")
 
     user = User(
@@ -83,10 +106,12 @@ def register(payload: RegisterRequest, session: Session = Depends(get_session)):
         role="agent"  # default role
     )
     session.add(user)
-    session.commit()
-    session.refresh(user)
+    await session.commit()
+    await session.refresh(user)
 
     token = create_access_token({"sub": str(user.id), "role": user.role})
+    logger.info("User registered successfully: id=%s email=%s", user.id, user.email)
+
     return AuthResponse(
         access_token=token,
         role=user.role,
@@ -98,13 +123,13 @@ def register(payload: RegisterRequest, session: Session = Depends(get_session)):
 # Admin Routes (Protected)
 # ---------------------------
 @router.get("/admin/dashboard")
-def admin_dashboard(admin: User = Depends(get_admin_user)):
+async def admin_dashboard(admin: User = Depends(get_admin_user)):
     return {"message": f"Welcome Admin {admin.name}"}
 
 @router.get("/admin/users")
-def admin_users(admin: User = Depends(get_admin_user)):
+async def admin_users(admin: User = Depends(get_admin_user)):
     return {"message": "User management page"}
 
 @router.get("/admin/settings")
-def admin_settings(admin: User = Depends(get_admin_user)):
+async def admin_settings(admin: User = Depends(get_admin_user)):
     return {"message": "App settings page"}

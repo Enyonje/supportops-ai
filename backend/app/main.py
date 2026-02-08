@@ -12,6 +12,10 @@ from app.core.config import settings
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+# ---------------------------
+# Lifespan (DB startup/shutdown)
+# ---------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
@@ -27,43 +31,57 @@ async def lifespan(app: FastAPI):
     yield
     await shutdown_db()
 
+
+# ---------------------------
+# App Init
+# ---------------------------
 app = FastAPI(
     title="SupportOps AI",
     version="0.1.0",
     lifespan=lifespan,
 )
 
-# ✅ CORS setup
-allowed_origins = [
-    "https://supportops-ai.vercel.app",
-    "https://supportops-ai-git-main-nyonjes-projects.vercel.app",
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
 
-
+# ---------------------------
+# CORS Setup (FIXED)
+# ---------------------------
 app.add_middleware(
     CORSMiddleware,
-    app.add_middleware(
-    CORSMiddleware,
+
+    # ✅ Allow all Vercel preview + production domains
     allow_origin_regex=r"https://supportops-ai.*\.vercel\.app",
-    
+
+    # ✅ Also allow local dev explicitly
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
+
     allow_credentials=True,
-    allow_methods=["*"],   # let FastAPI expand automatically
-    allow_headers=["*"],   # wildcard is fine alone
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# ✅ Routers
+
+# ---------------------------
+# Routers
+# ---------------------------
 app.include_router(api_router, prefix="/api/v1")
 
+
+# ---------------------------
+# Health Checks
+# ---------------------------
 @app.get("/db-check")
 async def db_check(session: AsyncSession = Depends(get_session)):
     result = await session.execute(text("SELECT 1"))
     return {"status": "ok" if result.scalar() == 1 else "error"}
 
+
 @app.get("/env-check")
 def env_check():
     db_url = settings.DATABASE_URL
+
     if db_url.startswith("sqlite"):
         db_backend = "SQLite"
     elif "supabase.co" in db_url:

@@ -47,19 +47,15 @@ app = FastAPI(
 # ---------------------------
 app.add_middleware(
     CORSMiddleware,
-
-    # ✅ Allow all Vercel preview + production domains
-    allow_origin_regex=r"https://supportops-ai.*\.vercel\.app",
-
-    # ✅ Also allow local dev explicitly
     allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
+        "https://supportops-ai.vercel.app",  # production frontend
+        "http://localhost:3000",             # local dev (React)
+        "http://localhost:5173",             # local dev (Vite)
     ],
-
+    allow_origin_regex=r"https://supportops-ai.*\.vercel\.app",  # allow Vercel preview deployments
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],   # allow all HTTP methods
+    allow_headers=["*"],   # allow all headers
 )
 
 

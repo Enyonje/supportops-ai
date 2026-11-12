@@ -5,7 +5,11 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    const API_BASE = (import.meta.env.VITE_API_BASE_URL || 'https://supportops-ai.onrender.com/api/v1').replace(/\/$/, '');
+    const API_BASE = (
+        import.meta.env.VITE_API_BASE_URL ||
+        "http://localhost:10000/api/v1" ||
+        "https://supportops-ai.onrender.com/api/v1"
+    ).replace(/\/$/, "");
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });

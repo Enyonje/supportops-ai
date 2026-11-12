@@ -18,11 +18,14 @@ dist/
 build/
 *.egg-info/
 .mypy_cache/
-
+.env
+.venv/
+.env/
+.env.example
 # --- Node.js (Frontend) ---
 node_modules/
-/frontend/dist
-/frontend/build
+/supportops/dist
+/supportops/build
 .eslintcache
 .stylelintcache
 npm-debug.log*
